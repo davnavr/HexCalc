@@ -11,6 +11,12 @@ type Integer =
     { Base: Base
       Value: int64 }
 
+    override this.ToString() =
+        match this.Base with
+        | Base2 -> System.Convert.ToString(this.Value, 2) |> sprintf "0b%s"
+        | Base10 -> string this.Value
+        | Base16 -> sprintf "0x%X" this.Value
+
     override this.Equals(other) =
         this.Value = (other :?> Integer).Value
 

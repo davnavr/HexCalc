@@ -1,7 +1,7 @@
 ﻿module HexCalc.ExprTests
 
-open Fuchu
 open System
+open Fuchu
 
 open HexCalc.ParseTests
 
