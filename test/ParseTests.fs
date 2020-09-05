@@ -19,6 +19,7 @@ let tests =
 
         "1 + 2", Add(num Base10 1, num Base10 2)
         "0xFFFF", num Base16 0xFFFF
+        " -3", Negate(num Base10 3)
     ]
     |> List.map (fun (str, expected) ->
         fun result ->

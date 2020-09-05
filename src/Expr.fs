@@ -17,5 +17,9 @@ let rec private evaluate cont =
     | Subtract (e1, e2) -> oper e1 e2 (-) cont
     | Multiply (e1, e2) -> oper e1 e2 (*) cont
     | Divide (e1, e2) -> oper e1 e2 (/) cont
+    | Negate expr ->
+        evaluate
+            (fun num -> cont { num with Value = -num.Value })
+            expr
 
 let eval = evaluate id

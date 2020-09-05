@@ -78,16 +78,21 @@ let input =
 
 do
     let inline operator op = op :> Operator<_,_,_>
+    let prefixOp c op prec =
+        (c.ToString(), spaces, prec, true, fun ex -> op ex)
+        |> PrefixOperator<_, _, _>
+        |> operator
     let infixOp c op prec =
-        (c.ToString(), spaces, prec, Associativity.Left, fun e1 e2 -> op(e1, e2))
+        (c, spaces, prec, Associativity.Left, fun e1 e2 -> op(e1, e2))
         |> InfixOperator<_,_,_>
         |> operator
 
     [
-        infixOp '+' Add 1
-        infixOp '-' Subtract 1
-        infixOp '*' Multiply 2
-        infixOp '/' Divide 2
+        infixOp "+" Add 1
+        infixOp "-" Subtract 1
+        infixOp "*" Multiply 2
+        infixOp "/" Divide 2
+        prefixOp '-' Negate 3
     ]
     |> List.iter exprRef.AddOperator
 
