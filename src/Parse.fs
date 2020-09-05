@@ -64,8 +64,10 @@ let private integer: Parser<_, unit> =
         ]
         "integer"
 
-let expr =
+let private nexpr =
     spaces >>. exprRef.ExpressionParser <?> "expression"
+
+let expr = nexpr .>> eof
 
 do
     let inline operator op = op :> Operator<_,_,_>
@@ -85,6 +87,12 @@ do
     exprRef.TermParser <-
         [
             integer |>> Integer
+
+            skipChar '('
+            |> attempt
+            >>. nexpr
+            .>> skipChar ')'
+            <?> "nested expression"
         ]
         |> choice
         .>> spaces

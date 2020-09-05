@@ -49,7 +49,7 @@ Target.create "Build" (fun _ ->
 Target.create "Test" (fun _ ->
     rootDir </> "test" </> "HexCalc.Tests.fsproj"
     |> runProj ""
-    |> handleErr "One or more tests failed"
+    |> handleErr "One or more tests may have failed"
 )
 
 Target.create "Publish" (fun _ ->
