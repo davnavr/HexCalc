@@ -9,7 +9,7 @@ let testStr str test =
         | Success(result, _, _) ->
             test result |> ignore
         | Failure(msg, _, _) ->
-            FuchuException msg |> raise
+            AssertException msg |> raise
     )
 
 let tests =

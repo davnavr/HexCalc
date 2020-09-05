@@ -8,12 +8,16 @@ let private exprRef = OperatorPrecedenceParser<Expression, unit, unit>()
 
 let private integer: Parser<_, unit> =
     let bchar =
-        [ '0'; '1' ] |> List.map pchar |> choice
-    let hchar = hex |>> Char.ToLower
+        [ '0'; '1' ]
+        |> List.map pchar
+        |> choice
+        <?> "binary digit"
     let digits p =
         skipChar '_'
-        |> many
-        |> sepBy1 p
+        <?> "digit separator"
+        |> many1
+        |> sepBy1 (many1Chars p)
+        |>> String.Concat
     let number nbase nvalue =
         { Base = nbase; Value = nvalue}
     choiceL
@@ -22,54 +26,48 @@ let private integer: Parser<_, unit> =
             |> attempt
             >>. digits bchar
             <?> "binary"
-            |>> fun chars ->
-                let rec inner pow num =
+            |>> fun str ->
+                let rec parseb pow num =
                     function
-                    | [] -> num
-                    | char :: tail ->
+                    | 0 -> num
+                    | i ->
+                        let index = i - 1
                         let next =
-                            match char with
+                            match str.Chars index with
                             | '0' -> num
-                            | _ -> num + pown 2L (pow + 1)
-                        inner (pow + 1) next tail
-                inner 0 0L chars |> number Base2
+                            | _ -> num + pown 2L pow
+                        parseb (pow + 1) next index
+                parseb 0 0L str.Length |> number Base2
 
             skipStringCI "0x"
             |> attempt
-            >>. digits hchar
+            >>. digits hex
             <?> "hexadecimal"
-            |>> fun chars ->
-                let rec inner pow num =
+            |>> fun str ->
+                let rec parseh pow num =
                     function
-                    | [] -> num
-                    | char :: tail ->
+                    | 0 -> num
+                    | i ->
+                        let index = i - 1
                         let n =
-                            match char with
-                            | '0' -> 0L
-                            | '1' -> 1L
-                            | '2' -> 2L
-                            | '3' -> 3L
-                            | '4' -> 4L
-                            | '5' -> 5L
-                            | '6' -> 6L
-                            | '7' -> 7L
-                            | '8' -> 8L
-                            | '9' -> 9L
-                            | _ -> int64 char - 87L
-                        inner (pow * 16u) (num + n * int64 pow) tail
-                inner 1u 0L chars |> number Base16
+                            let char =
+                                str.Chars index |> int64 ||| int64 ' '
+                            let offset =
+                                if char <= int64 '9' then int64 '0' else 87L
+                            char - offset
+                        parseh (pow * 16u) (num + n * int64 pow) index
+                parseh 1u 0L str.Length |> number Base16
 
             digits digit
             <?> "decimal"
-            |>> fun chars ->
-                Array.ofList chars
-                |> String
-                |> Int64.Parse
-                |> number Base10
+            |>> (Int64.Parse >> number Base10)
         ]
         "integer"
 
-let expr = exprRef.ExpressionParser <?> "expression"
+let expr =
+    exprRef.ExpressionParser
+    .>> eof
+    <?> "expression"
 
 do
     let inline operator op = op :> Operator<_,_,_>
