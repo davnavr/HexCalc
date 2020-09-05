@@ -2,14 +2,19 @@
 
 open Fuchu
 
+open HexCalc.ParseTests
+
 let tests =
     [
-        test "add" {
-            let inline num value =
-                { Base = Base10; Value = int64 value }
-            let result =
-                Add(num 3 |> Integer, num 4 |> Integer) |> Expr.eval
-            Assert.Equal("expr", num 7, result)
-        }
+        "5 + 10", Base10, 15L
+        "0b1 + 2", Base2, 3L
+        "0x2 * 5", Base16, 10L
     ]
+    |> List.map (fun (str, expbase, expval) ->
+        fun result ->
+            let expected =
+                { Base = expbase
+                  Value = expval }
+            Assert.Equal("correct value", expected, Expr.eval result)
+        |> testStr str)
     |> testList "expression tests"

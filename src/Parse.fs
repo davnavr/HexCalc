@@ -69,7 +69,7 @@ let private integer: Parser<_, unit> =
         ]
         "integer"
 
-let expr = exprRef.TermParser <?> "expression"
+let expr = exprRef.ExpressionParser <?> "expression"
 
 do
     let inline operator op = op :> Operator<_,_,_>

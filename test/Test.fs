@@ -5,6 +5,7 @@ open Fuchu
 let tests =
     [
         ExprTests.tests
+        ParseTests.tests
     ]
     |> testList "tests"
 

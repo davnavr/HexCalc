@@ -20,6 +20,7 @@ type Integer =
         member this.CompareTo(other) =
             this.Value.CompareTo (other :?> Integer).Value
 
+[<StructuralComparison; StructuralEquality>]
 type Expression =
     | Integer of Integer
     | Add of Expression * Expression
