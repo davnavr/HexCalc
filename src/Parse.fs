@@ -55,8 +55,8 @@ let private integer: Parser<_, unit> =
                             let offset =
                                 if char <= int64 '9' then int64 '0' else 87L
                             char - offset
-                        parseh (pow * 16u) (num + n * int64 pow) index
-                parseh 1u 0L str.Length |> number Base16
+                        parseh (pow + 1) (num + n * pown 16L pow) index
+                parseh 0 0L str.Length |> number Base16
 
             digits digit
             <?> "decimal"
