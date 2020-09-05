@@ -19,7 +19,9 @@ let tests =
         "(-7 * -7) + 0b0001_0010", Base10, 67L
         "0x0 + 7 * (5 + (3 * 4))", Base16, 119L
         "-10 + 5", Base10, -5L
-
+        "0b1100 & 0b0101", Base2, 0b0100L
+        "0b0110 | 0x1", Base2, 0b0111L
+        "0x3 ^ 0b1100", Base16, 0xFL
     ]
     |> List.map (fun (str, expbase, expval) ->
         fun result ->

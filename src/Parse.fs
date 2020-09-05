@@ -6,6 +6,7 @@ open FParsec
 
 let private exprRef = OperatorPrecedenceParser<Expression, unit, unit>()
 
+// TODO: Fix, overflow exception is thrown when number is too big.
 let private integer: Parser<_, unit> =
     let bchar =
         [ '0'; '1' ]
@@ -60,7 +61,7 @@ let private integer: Parser<_, unit> =
 
             digits digit
             <?> "decimal"
-            |>> (Int64.Parse >> number Base10) // TODO: Fix, overflow exception is thrown when number is too big to parse.
+            |>> (Int64.Parse >> number Base10)
         ]
         "integer"
 
@@ -94,11 +95,14 @@ do
         |> operator
 
     [
-        infixOp "+" Add 1
-        infixOp "-" Subtract 1
-        infixOp "*" Multiply 2
-        infixOp "/" Divide 2
-        prefixOp '-' Negate 3
+        infixOp "&" And 1
+        infixOp "|" Or 1
+        infixOp "^" Xor 2
+        infixOp "+" Add 3
+        infixOp "-" Subtract 3
+        infixOp "*" Multiply 4
+        infixOp "/" Divide 4
+        prefixOp '-' Negate 5
     ]
     |> List.iter exprRef.AddOperator
 

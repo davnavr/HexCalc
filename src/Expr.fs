@@ -13,6 +13,9 @@ let rec private evaluate cont =
             e1
     function
     | Integer num -> cont num
+    | And (e1, e2) -> oper e1 e2 (&&&) cont
+    | Or (e1, e2) -> oper e1 e2 (|||) cont
+    | Xor (e1, e2) -> oper e1 e2 (^^^) cont
     | Add (e1, e2) -> oper e1 e2 (+) cont
     | Subtract (e1, e2) -> oper e1 e2 (-) cont
     | Multiply (e1, e2) -> oper e1 e2 (*) cont
