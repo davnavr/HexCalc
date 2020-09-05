@@ -65,9 +65,7 @@ let private integer: Parser<_, unit> =
         "integer"
 
 let expr =
-    exprRef.ExpressionParser
-    .>> eof
-    <?> "expression"
+    spaces >>. exprRef.ExpressionParser <?> "expression"
 
 do
     let inline operator op = op :> Operator<_,_,_>
