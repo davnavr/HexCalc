@@ -11,11 +11,16 @@ type Integer =
     { Base: Base
       Value: int64 }
 
-    override this.ToString() = // TODO: Fix, negative digit is not shown for hex or binary numbers.
+    override this.ToString() =
+        let neg = 
+            if this.Value < 0L then " (negative)" else ""
         match this.Base with
-        | Base2 -> System.Convert.ToString(this.Value, 2) |> sprintf "0b%s"
         | Base10 -> string this.Value
-        | Base16 -> sprintf "0x%X" this.Value
+        | Base2 ->
+            let bits = System.Convert.ToString(this.Value, 2)
+            sprintf "0b%s%s" bits neg
+        | Base16 ->
+            sprintf "0x%X%s" this.Value neg
 
     override this.Equals(other) =
         this.Value = (other :?> Integer).Value
