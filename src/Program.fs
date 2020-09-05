@@ -14,6 +14,7 @@ let private help =
         "Commands:"
         "'help' - Displays this help message"
         "'clear' or 'cls' - Clears the screen"
+        "'quit' or 'exit' - Quits the application"
     |]
     |> merge
 
@@ -25,6 +26,7 @@ let calc str =
             Expr.eval ex |> Output.Result
         | Input.Help -> Output.Help
         | Input.Clear -> Output.Clear
+        | Input.Quit -> Output.Quit
     | Failure(msg, _, _) ->
         Output.Error msg
 
@@ -40,8 +42,8 @@ let private print (msg: obj) color =
 let main _ =
     printfn "Type 'help' for help"
     let readExpr = readLine ConsoleColor.Gray >> calc
-    // TODO: Figure out how to allow user to exit.
-    while true do
+    let mutable cont = true
+    while cont do
         match readExpr() with
         | Output.Result value ->
             print value ConsoleColor.Yellow
@@ -51,4 +53,5 @@ let main _ =
             Console.Clear()
         | Output.Error msg ->
             print msg ConsoleColor.Red
+        | Output.Quit -> cont <- false
     0

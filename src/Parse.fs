@@ -79,6 +79,7 @@ let input =
         expr |>> Input.Expr
         command [ "help" ] Input.Help
         command [ "clear"; "cls" ] Input.Clear
+        command [ "quit"; "exit" ] Input.Quit
     ]
     |> choice
     .>> eof

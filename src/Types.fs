@@ -48,6 +48,7 @@ type Input =
     | Expr of Expression
     | Help
     | Clear
+    | Quit
 
 [<RequireQualifiedAccess>]
 type Output =
@@ -55,3 +56,4 @@ type Output =
     | Error of msg: string
     | Help
     | Clear
+    | Quit
