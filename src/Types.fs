@@ -33,4 +33,16 @@ type Expression =
     | Subtract of Expression * Expression
     | Multiply of Expression * Expression
     | Divide of Expression * Expression
-    // TODO: Add other operations.
+
+[<RequireQualifiedAccess>]
+type Input =
+    | Expr of Expression
+    | Help
+    | Clear
+
+[<RequireQualifiedAccess>]
+type Output =
+    | Result of Integer
+    | Error of msg: string
+    | Help
+    | Clear

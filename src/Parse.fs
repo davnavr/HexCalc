@@ -64,10 +64,17 @@ let private integer: Parser<_, unit> =
         ]
         "integer"
 
-let private nexpr =
+let expr =
     spaces >>. exprRef.ExpressionParser <?> "expression"
 
-let expr = nexpr .>> eof
+let input =
+    [
+        expr |>> Input.Expr
+        skipString "help" >>% Input.Help
+        skipString "clear" >>% Input.Clear
+    ]
+    |> choice
+    .>> eof
 
 do
     let inline operator op = op :> Operator<_,_,_>
@@ -90,7 +97,7 @@ do
 
             skipChar '('
             |> attempt
-            >>. nexpr
+            >>. expr
             .>> skipChar ')'
             <?> "nested expression"
         ]
