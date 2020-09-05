@@ -10,16 +10,22 @@ let calc str =
     | Failure(msg, _, _) ->
         Result.Error msg
 
+let readLine color () =
+    Console.ForegroundColor <- color
+    Console.ReadLine()
+
+let private print (msg: obj) color =
+    Console.ForegroundColor <- color
+    Console.WriteLine msg
+
 [<EntryPoint>]
 let main _ =
+    let readExpr = readLine ConsoleColor.Gray >> calc
     // TODO: Figure out how to allow user to exit.
     while true do
-        match stdin.ReadLine() |> calc with
+        match readExpr() with
         | Result.Ok value ->
-            Console.WriteLine value
+            print value ConsoleColor.Yellow
         | Result.Error msg ->
-            let prev = Console.ForegroundColor
-            Console.ForegroundColor <- ConsoleColor.Red
-            Console.WriteLine msg
-            Console.ForegroundColor <- prev
+            print msg ConsoleColor.Red
     0
