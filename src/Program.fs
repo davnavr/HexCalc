@@ -10,9 +10,10 @@ let private help =
         "Examples:"
         "- '0x1A + 0b1101 * (5 - 3)'"
         "- '0xFFFF_FFFF / 2'"
+        "- '(-7 * -7) + 0b0001_0010'"
         "Commands:"
         "'help' - Displays this help message"
-        "'clear' - Clears the screen"
+        "'clear' or 'cls' - Clears the screen"
     |]
     |> merge
 

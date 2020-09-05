@@ -60,7 +60,7 @@ let private integer: Parser<_, unit> =
 
             digits digit
             <?> "decimal"
-            |>> (Int64.Parse >> number Base10)
+            |>> (Int64.Parse >> number Base10) // TODO: Fix, overflow exception is thrown when number is too big to parse.
         ]
         "integer"
 
@@ -68,10 +68,16 @@ let expr =
     spaces >>. exprRef.ExpressionParser <?> "expression"
 
 let input =
+    let command names cmd =
+        List.map
+            (skipString >> attempt)
+            names
+        |> choice
+        >>% cmd
     [
         expr |>> Input.Expr
-        skipString "help" >>% Input.Help
-        skipString "clear" >>% Input.Clear
+        command [ "help" ] Input.Help
+        command [ "clear"; "cls" ] Input.Clear
     ]
     |> choice
     .>> eof
