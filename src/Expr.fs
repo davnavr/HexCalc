@@ -1,11 +1,9 @@
 ﻿[<RequireQualifiedAccess>]
 module HexCalc.Expr
 
-// TODO: Figure out if this function is tail recursive.
-// TODO: Figure out how integer overflow will be handled.
-// TODO: There must be a problem with the evaluation of expressions, since 1 + 2 + 3 parses correctly but evaluates to 3 instead of 6.
+// TODO: Make this function tail recursive.
 let rec private evaluate cont = 
-    let oper e1 e2 op cont =
+    let inline oper e1 e2 op cont =
         evaluate
             (fun num1 ->
                 evaluate

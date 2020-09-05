@@ -14,6 +14,8 @@ let tests =
         "0x7FFF_FFFF_FFFF_FFFF + 1", Base16, Int64.MinValue
         "  0x4 /   0x02", Base16, 2L
         "1 + 2 * 5", Base10, 11L
+        "3 * (5 + 0b0000_0001)", Base10, 18L
+        "0x0 + 7 * (5 + (3 * 4))", Base16, 119L
     ]
     |> List.map (fun (str, expbase, expval) ->
         fun result ->
