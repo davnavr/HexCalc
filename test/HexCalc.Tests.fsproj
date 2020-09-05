@@ -9,6 +9,7 @@
 
   <!-- Source files -->
   <ItemGroup>
+    <Compile Include="ExprTests.fs" />
     <Compile Include="Test.fs" />
   </ItemGroup>
   

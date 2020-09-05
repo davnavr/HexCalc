@@ -10,6 +10,7 @@
   <!-- Source files -->
   <ItemGroup>
     <Compile Include="Types.fs" />
+    <Compile Include="Expr.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   

@@ -1,10 +1,10 @@
-﻿module FSharpIL.Test
+﻿module HexCalc.Test
 
 open Fuchu
 
 let tests =
     [
-        // TODO: Add tests
+        ExprTests.tests
     ]
     |> testList "tests"
 

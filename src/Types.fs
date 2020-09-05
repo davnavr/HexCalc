@@ -10,6 +10,7 @@ type Value =
     | Int64 of int64
     | UInt64 of uint64
 
+[<StructuralComparison; StructuralEquality>]
 type Base =
     | Base2
     | Base10
@@ -25,4 +26,4 @@ type Expression =
     | Subtract of Expression * Expression
     | Multiply of Expression * Expression
     | Divide of Expression * Expression
-    | WithBase of Base * Expression
+    | ConvertBase of Base * Expression
