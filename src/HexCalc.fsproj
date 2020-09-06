@@ -4,10 +4,15 @@
   <PropertyGroup>
     <AssemblyName>HexCalc</AssemblyName>
     <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Package properties -->
+  <PropertyGroup>
     <PackAsTool>true</PackAsTool>
     <RepositoryUrl>https://github.com/davnavr/HexCalc</RepositoryUrl>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <ToolCommandName>hexcalc</ToolCommandName>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <!-- Source files -->
