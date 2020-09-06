@@ -1,0 +1,41 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.401
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Install global tools
+      run: dotnet tool restore
+    - name: Build
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet fake run build.fsx -t Publish
+    - name: Create GitHub Release
+      id: create_gh_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: v${{ github.ref }}
+    - name: Publish GitHub Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_gh_release.outputs.upload_url }}
+        asset_path: ./out/HexCalc.${{ github.ref }}.nupkg
+        asset_name: HexCalc.${{ github.ref }}.nupkg
+        asset_content_type: application/zip
