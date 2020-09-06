@@ -16,6 +16,8 @@ jobs:
         dotnet-version: 3.1.401
     - name: Install dependencies
       run: dotnet restore
+    - name: Install global tools
+      run: dotnet tool restore
     - name: Build
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
