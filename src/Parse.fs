@@ -103,6 +103,7 @@ do
         infixOp "-" Subtract 3
         infixOp "*" Multiply 4
         infixOp "/" Divide 4
+        infixOp "%" Modulo 4
         prefixOp '-' Negate 5
     ]
     |> List.iter exprRef.AddOperator

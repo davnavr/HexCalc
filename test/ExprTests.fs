@@ -22,6 +22,7 @@ let tests =
         "0b1100 & 0b0101", Base2, 0b0100L
         "0b0110 | 0x1", Base2, 0b0111L
         "0x3 ^ 0b1100", Base16, 0xFL
+        "10 % 7", Base10, 3L
     ]
     |> List.map (fun (str, expbase, expval) ->
         fun result ->

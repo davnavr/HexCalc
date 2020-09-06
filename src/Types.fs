@@ -38,6 +38,7 @@ type Expression =
     | Subtract of Expression * Expression
     | Multiply of Expression * Expression
     | Divide of Expression * Expression
+    | Modulo of Expression * Expression
     | Negate of Expression
     | And of Expression * Expression
     | Or of Expression * Expression
