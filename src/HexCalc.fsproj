@@ -7,6 +7,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <!-- Package properties -->
+  <PropertyGroup>
+    <PackAsTool>true</PackAsTool>
+    <RepositoryUrl>https://github.com/davnavr/HexCalc</RepositoryUrl>
+    <ToolCommandName>hexcalc</ToolCommandName>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
   <!-- Source files -->
   <ItemGroup>
     <Compile Include="Types.fs" />

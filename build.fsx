@@ -11,11 +11,13 @@ nuget Fake.IO.FileSystem
 open Fake.Core
 open Fake.Core.TargetOperators
 open Fake.DotNet
+open Fake.IO
 open Fake.IO.FileSystemOperators
 
 module DotNetCli = Fake.DotNet.DotNet
 
 let rootDir = __SOURCE_DIRECTORY__
+let outDir = rootDir </> "out"
 let slnFile = rootDir </> "HexCalc.sln"
 
 let handleErr msg: ProcessResult -> _ =
@@ -32,9 +34,11 @@ let runProj args proj =
     |> DotNetCli.exec id "run"
 
 Target.create "Clean" (fun _ ->
+    Shell.cleanDir outDir
+
     slnFile
     |> DotNetCli.exec id "clean"
-    |> ignore
+    |> handleErr "Unexpected error while cleaning solution"
 )
 
 Target.create "Build" (fun _ ->
@@ -52,13 +56,19 @@ Target.create "Test" (fun _ ->
     |> handleErr "One or more tests may have failed"
 )
 
-Target.create "Publish" (fun _ ->
-    Trace.trace "Publishing..."
+Target.create "Pack" (fun _ ->
+    rootDir </> "src" </> "HexCalc.fsproj"
+    |> DotNetCli.pack
+        (fun opt ->
+            { opt with
+                Configuration = DotNetCli.Release
+                NoRestore = true
+                OutputPath = Some outDir })
 )
 
 "Clean"
 ==> "Build"
 ==> "Test"
-==> "Publish"
+==> "Pack"
 
-Target.runOrDefault "Publish"
+Target.runOrDefault "Pack"
