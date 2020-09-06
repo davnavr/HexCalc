@@ -18,4 +18,4 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet fake run build.fsx -t Test
+      run: dotnet fake run build.fsx

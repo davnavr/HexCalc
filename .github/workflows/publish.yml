@@ -17,7 +17,9 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet fake run build.fsx
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet fake run build.fsx -t Publish
     - name: Create GitHub Release
       id: create_gh_release
       uses: actions/create-release@v1
