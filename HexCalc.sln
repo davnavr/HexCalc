@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "HexCalc", "src\HexCalc.fsproj", "{32EE4EC0-C8E8-4100-B28D-5B80508D3634}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "HexCalc.Tests", "test\HexCalc.Tests.fsproj", "{7D962DBA-6509-4432-9CA5-B5874F5AC856}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32EE4EC0-C8E8-4100-B28D-5B80508D3634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32EE4EC0-C8E8-4100-B28D-5B80508D3634}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32EE4EC0-C8E8-4100-B28D-5B80508D3634}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32EE4EC0-C8E8-4100-B28D-5B80508D3634}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D962DBA-6509-4432-9CA5-B5874F5AC856}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D962DBA-6509-4432-9CA5-B5874F5AC856}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D962DBA-6509-4432-9CA5-B5874F5AC856}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D962DBA-6509-4432-9CA5-B5874F5AC856}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {75B5B4A0-1B32-4703-9F9F-0B6D638DAFA2}
+	EndGlobalSection
+EndGlobal
