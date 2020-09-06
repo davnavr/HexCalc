@@ -11,6 +11,7 @@ nuget Fake.IO.FileSystem
 open Fake.Core
 open Fake.Core.TargetOperators
 open Fake.DotNet
+open Fake.IO
 open Fake.IO.FileSystemOperators
 
 module DotNetCli = Fake.DotNet.DotNet
@@ -33,9 +34,11 @@ let runProj args proj =
     |> DotNetCli.exec id "run"
 
 Target.create "Clean" (fun _ ->
+    Shell.cleanDir outDir
+
     slnFile
     |> DotNetCli.exec id "clean"
-    |> ignore
+    |> handleErr "Unexpected error while cleaning solution"
 )
 
 Target.create "Build" (fun _ ->
