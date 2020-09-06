@@ -33,6 +33,7 @@ jobs:
     - name: Publish GitHub Release
       uses: actions/upload-release-asset@v1
       env:
+        PACKAGE_VERSION: ${{ github.ref }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_gh_release.outputs.upload_url }}

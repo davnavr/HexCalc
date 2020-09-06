@@ -12,7 +12,6 @@
     <PackAsTool>true</PackAsTool>
     <RepositoryUrl>https://github.com/davnavr/HexCalc</RepositoryUrl>
     <ToolCommandName>hexcalc</ToolCommandName>
-    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <!-- Source files -->

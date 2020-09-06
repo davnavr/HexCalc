@@ -20,6 +20,10 @@ let rootDir = __SOURCE_DIRECTORY__
 let outDir = rootDir </> "out"
 let slnFile = rootDir </> "HexCalc.sln"
 
+let version = Environment.environVarOrDefault "PACKAGE_VERSION" "0.0.0"
+let withVersion pname (opt: Fake.DotNet.MSBuild.CliArguments) =
+    { opt with Properties = (pname, version) :: opt.Properties }
+
 let handleErr msg: ProcessResult -> _ =
     function
     | { ExitCode = ecode } when ecode <> 0 ->
@@ -28,7 +32,7 @@ let handleErr msg: ProcessResult -> _ =
 
 let runProj args proj =
     sprintf
-        "--project %s --no-restore --configuration Release -- %s"
+        "--project %s --no-build --no-restore --configuration Release -- %s"
         proj
         args
     |> DotNetCli.exec id "run"
@@ -46,7 +50,7 @@ Target.create "Build" (fun _ ->
         (fun opt ->
             { opt with
                 Configuration = DotNetCli.Release
-                // TODO: Set package version.
+                MSBuildParams = withVersion "Version" opt.MSBuildParams
                 NoRestore = true })
         slnFile
 )
@@ -63,6 +67,8 @@ Target.create "Pack" (fun _ ->
         (fun opt ->
             { opt with
                 Configuration = DotNetCli.Release
+                MSBuildParams = withVersion "PackageVersion" opt.MSBuildParams
+                NoBuild = true
                 NoRestore = true
                 OutputPath = Some outDir })
 )
