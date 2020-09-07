@@ -19,7 +19,6 @@ jobs:
       uses: mindsers/changelog-reader-action@v2
       with:
         path: ./CHANGELOG.md
-        version: ${{ github.ref }}
     - name: Install Dependencies
       run: dotnet restore
     - name: Install Global Tools
