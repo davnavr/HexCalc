@@ -9,7 +9,9 @@
 
   <!-- Package properties -->
   <PropertyGroup>
+    <Description>A simple command line for doing math with hexadecimal, decimal, and binary numbers.</Description>
     <PackAsTool>true</PackAsTool>
+    <PackageTags>hexadecimal math calculator tool</PackageTags>
     <RepositoryUrl>https://github.com/davnavr/HexCalc</RepositoryUrl>
     <ToolCommandName>hexcalc</ToolCommandName>
   </PropertyGroup>
