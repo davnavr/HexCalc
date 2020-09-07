@@ -61,8 +61,6 @@ Target.create "Test" (fun _ ->
     |> handleErr "One or more tests may have failed"
 )
 
-"Clean" ==> "Build" ==> "Test"
-
 Target.create "Pack" (fun _ ->
     rootDir </> "src" </> "HexCalc.fsproj"
     |> DotNetCli.pack
@@ -75,18 +73,6 @@ Target.create "Pack" (fun _ ->
                 OutputPath = Some outDir })
 )
 
-Target.create "Publish" (fun _ ->
-    let package =
-        Directory.findFirstMatchingFile "HexCalc.*.nupkg" outDir
-    sprintf
-        "push %s --api-key %s --source %s"
-        package
-        (Environment.environVar "NUGET_API_KEY")
-        "https://api.nuget.org/v3/index.json"
-    |> DotNetCli.exec id "nuget"
-    |> handleErr "Failed to publish package to NuGet"
-)
-
-"Pack" ==> "Publish"
+"Clean" ==> "Build" ==> "Test" ==> "Pack"
 
 Target.runOrDefault "Test"

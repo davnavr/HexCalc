@@ -1,23 +1,19 @@
 name: Build
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [ push, pull_request ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [ windows-latest, ubuntu-latest ]
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.401
-    - name: Install dependencies
+    - name: Install Dependencies
       run: dotnet restore
-    - name: Install global tools
+    - name: Install Global Tools
       run: dotnet tool restore
-    - name: Build
+    - name: Test
       run: dotnet fake run build.fsx -t Test

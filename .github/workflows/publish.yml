@@ -3,23 +3,25 @@ name: Publish
 on:
   push:
     tags:
-      - '*'
+      - v*
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.401
-    - name: Install dependencies
+    - name: Install Dependencies
       run: dotnet restore
-    - name: Install global tools
+    - name: Install Global Tools
       run: dotnet tool restore
     - name: Build
-      run: dotnet fake run build.fsx -t Test
+      env:
+        PACKAGE_VERSION: ${{ github.ref }}
+      run: dotnet fake run build.fsx -t Pack
     - name: Create GitHub Release
       id: create_gh_release
       uses: actions/create-release@v1
@@ -35,10 +37,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_gh_release.outputs.upload_url }}
-        asset_path: ./out/HexCalc.${{ github.ref }}.nupkg
+        asset_path: ./out/HexCalc.*.nupkg
         asset_name: HexCalc.${{ github.ref }}.nupkg
         asset_content_type: application/zip
     - name: Publish NuGet
-      env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      run: dotnet fake run build.fsx -t Publish
+      run: dotnet nuget push ./out/HexCalc.${{ github.ref }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} -- source https://api.nuget.org/v3/index.json
