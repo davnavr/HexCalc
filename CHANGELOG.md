@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 0.1.1 - 2020-09-07
+### Fixed
+- GitHub Action Workflow for publishing now shouldn't fail
+
 ## 0.1.0 - 2020-09-06
 ### Added
 - CHANGELOG file for determining version when publishing using the GitHub Action workflow
