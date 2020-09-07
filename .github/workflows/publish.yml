@@ -19,9 +19,7 @@ jobs:
     - name: Install global tools
       run: dotnet tool restore
     - name: Build
-      env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      run: dotnet fake run build.fsx -t Publish
+      run: dotnet fake run build.fsx -t Test
     - name: Create GitHub Release
       id: create_gh_release
       uses: actions/create-release@v1
@@ -40,3 +38,7 @@ jobs:
         asset_path: ./out/HexCalc.${{ github.ref }}.nupkg
         asset_name: HexCalc.${{ github.ref }}.nupkg
         asset_content_type: application/zip
+    - name: Publish NuGet
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet fake run build.fsx -t Publish

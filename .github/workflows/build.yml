@@ -20,4 +20,4 @@ jobs:
     - name: Install global tools
       run: dotnet tool restore
     - name: Build
-      run: dotnet fake run build.fsx
+      run: dotnet fake run build.fsx -t Test

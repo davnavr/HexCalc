@@ -61,6 +61,8 @@ Target.create "Test" (fun _ ->
     |> handleErr "One or more tests may have failed"
 )
 
+"Clean" ==> "Build" ==> "Test"
+
 Target.create "Pack" (fun _ ->
     rootDir </> "src" </> "HexCalc.fsproj"
     |> DotNetCli.pack
@@ -85,13 +87,6 @@ Target.create "Publish" (fun _ ->
     |> handleErr "Failed to publish package to NuGet"
 )
 
-Target.create "Default" ignore
+"Pack" ==> "Publish"
 
-"Clean"
-==> "Build"
-==> "Test"
-==> "Default"
-==> "Pack"
-==> "Publish"
-
-Target.runOrDefault "Default"
+Target.runOrDefault "Test"
