@@ -17,9 +17,9 @@ let rec private evaluate cont =
     | Or (e1, e2) -> oper e1 e2 (|||) cont
     | Xor (e1, e2) -> oper e1 e2 (^^^) cont
     | Add (e1, e2) -> oper e1 e2 (+) cont
-    | Subtract (e1, e2) -> oper e1 e2 (-) cont
-    | Multiply (e1, e2) -> oper e1 e2 (*) cont
-    | Divide (e1, e2) -> oper e1 e2 (/) cont
+    | Sub (e1, e2) -> oper e1 e2 (-) cont
+    | Mul (e1, e2) -> oper e1 e2 (*) cont
+    | Div (e1, e2) -> oper e1 e2 (/) cont
     | Modulo (e1, e2) -> oper e1 e2 (%) cont
     | Negate expr ->
         evaluate

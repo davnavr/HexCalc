@@ -109,13 +109,13 @@ do
         |> operator
 
     [
-        infixOp "&" And 1
+        infixOp "&" And 1 // TODO: Use the operators defined in Terms.fs
         infixOp "|" Or 1
         infixOp "^" Xor 2
         infixOp "+" Add 3
-        infixOp "-" Subtract 3
-        infixOp "*" Multiply 4
-        infixOp "/" Divide 4
+        infixOp "-" Sub 3
+        infixOp "*" Mul 4
+        infixOp "/" Div 4
         infixOp "%" Modulo 4
         prefixOp '-' Negate 5
     ]

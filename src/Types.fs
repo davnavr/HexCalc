@@ -35,9 +35,9 @@ type Integer =
 type Expression =
     | Integer of Integer
     | Add of Expression * Expression
-    | Subtract of Expression * Expression
-    | Multiply of Expression * Expression
-    | Divide of Expression * Expression
+    | Sub of Expression * Expression
+    | Mul of Expression * Expression
+    | Div of Expression * Expression
     | Modulo of Expression * Expression
     | Negate of Expression
     | And of Expression * Expression
