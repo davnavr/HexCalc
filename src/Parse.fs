@@ -65,6 +65,13 @@ let private integer: Parser<_, unit> =
         ]
         "integer"
 
+let ws: Parser<unit, unit> =
+    [
+        skipAnyOf [ '('; ')' ]
+        spaces1
+    ]
+    |> choice
+
 let expr =
     spaces >>. exprRef.ExpressionParser <?> "expression"
 
@@ -75,11 +82,17 @@ let input =
             names
         |> choice
         >>% cmd
+    let help =
+        spaces1 >>. restOfLine false |> opt
     [
         expr |>> Input.Expr
-        command [ "help" ] Input.Help
+
         command [ "clear"; "cls" ] Input.Clear
         command [ "quit"; "exit" ] Input.Quit
+
+        skipString "help"
+        >>. help
+        |>> Input.Help
     ]
     |> choice
     .>> eof

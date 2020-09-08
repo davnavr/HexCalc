@@ -47,7 +47,7 @@ type Expression =
 [<RequireQualifiedAccess>]
 type Input =
     | Expr of Expression
-    | Help
+    | Help of term: string option
     | Clear
     | Quit
 
@@ -55,6 +55,6 @@ type Input =
 type Output =
     | Result of Integer
     | Error of msg: string
-    | Help
+    | Messages of string list
     | Clear
     | Quit
