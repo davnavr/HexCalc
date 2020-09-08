@@ -98,28 +98,20 @@ let input =
     .>> eof
 
 do
-    let inline operator op = op :> Operator<_,_,_>
-    let prefixOp c op prec =
-        (c.ToString(), spaces, prec, true, fun ex -> op ex)
-        |> PrefixOperator<_, _, _>
-        |> operator
-    let infixOp c op prec =
-        (c, spaces, prec, Associativity.Left, fun e1 e2 -> op(e1, e2))
-        |> InfixOperator<_,_,_>
-        |> operator
-
-    [
-        infixOp "&" And 1 // TODO: Use the operators defined in Terms.fs
-        infixOp "|" Or 1
-        infixOp "^" Xor 2
-        infixOp "+" Add 3
-        infixOp "-" Sub 3
-        infixOp "*" Mul 4
-        infixOp "/" Div 4
-        infixOp "%" Modulo 4
-        prefixOp '-' Negate 5
-    ]
-    |> List.iter exprRef.AddOperator
+    let prefixOp op c prec =
+        PrefixOperator<_, _, _>(c.ToString(), spaces, prec, true, fun ex -> op ex) :> Operator<_, _, _>
+    let infixOp op c prec =
+        InfixOperator<_, _, _>(c, spaces, prec, Associativity.Left, fun e1 e2 -> op(e1, e2)) :> Operator<_,_,_>
+    seq {
+        for op in Terms.operators do
+            let eoper =
+                match op.Operation with
+                | Terms.Infix oper -> infixOp oper
+                | Terms.Prefix oper -> prefixOp oper
+            eoper op.Symbol op.Precedence
+        prefixOp Negate '-' 5
+    }
+    |> Seq.iter exprRef.AddOperator
 
     exprRef.TermParser <-
         [
