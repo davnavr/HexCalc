@@ -65,6 +65,13 @@ let private integer: Parser<_, unit> =
         ]
         "integer"
 
+let ws: Parser<unit, unit> =
+    [
+        skipAnyOf [ '('; ')' ]
+        spaces1
+    ]
+    |> choice
+
 let expr =
     spaces >>. exprRef.ExpressionParser <?> "expression"
 
@@ -75,38 +82,35 @@ let input =
             names
         |> choice
         >>% cmd
+    let help =
+        spaces1 >>. restOfLine false |> opt
     [
         expr |>> Input.Expr
-        command [ "help" ] Input.Help
+
         command [ "clear"; "cls" ] Input.Clear
         command [ "quit"; "exit" ] Input.Quit
+
+        skipString "help"
+        >>. help
+        |>> Input.Help
     ]
     |> choice
     .>> eof
 
 do
-    let inline operator op = op :> Operator<_,_,_>
-    let prefixOp c op prec =
-        (c.ToString(), spaces, prec, true, fun ex -> op ex)
-        |> PrefixOperator<_, _, _>
-        |> operator
-    let infixOp c op prec =
-        (c, spaces, prec, Associativity.Left, fun e1 e2 -> op(e1, e2))
-        |> InfixOperator<_,_,_>
-        |> operator
-
-    [
-        infixOp "&" And 1
-        infixOp "|" Or 1
-        infixOp "^" Xor 2
-        infixOp "+" Add 3
-        infixOp "-" Subtract 3
-        infixOp "*" Multiply 4
-        infixOp "/" Divide 4
-        infixOp "%" Modulo 4
-        prefixOp '-' Negate 5
-    ]
-    |> List.iter exprRef.AddOperator
+    let prefixOp op c prec =
+        PrefixOperator<_, _, _>(c, spaces, prec, true, fun ex -> op ex) :> Operator<_, _, _>
+    let infixOp op c prec =
+        InfixOperator<_, _, _>(c, spaces, prec, Associativity.Left, fun e1 e2 -> op(e1, e2)) :> Operator<_,_,_>
+    seq {
+        for op in Terms.operators do
+            let eoper =
+                match op.Operation with
+                | Terms.InfixOp oper -> infixOp oper
+                | Terms.PrefixOp oper -> prefixOp oper
+            eoper op.Symbol op.Precedence
+    }
+    |> Seq.iter exprRef.AddOperator
 
     exprRef.TermParser <-
         [
