@@ -55,6 +55,6 @@ type Input =
 type Output =
     | Result of Integer
     | Error of msg: string
-    | Messages of string list
+    | Messages of lines: seq<string>
     | Clear
     | Quit

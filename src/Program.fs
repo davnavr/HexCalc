@@ -21,13 +21,17 @@ let input str =
         | Input.Expr ex ->
             Expr.eval ex |> Output.Result
         | Input.Help None -> Output.Messages help
-        | Input.Help term ->
+        | Input.Help (Some "all") ->
+            Terms.all
+            |> Map.toSeq
+            |> Seq.map (fst >> sprintf "- %s")
+            |> Output.Messages
+        | Input.Help (Some term) ->
             match Terms.search term with
-            | Some (Result.Ok desc) ->
+            | Result.Ok desc ->
                 Output.Messages desc
-            | Some (Result.Error term) ->
+            | Result.Error _ ->
                 sprintf "Unknown term '%s'" term |> Output.Error
-            | None -> Output.Messages help
         | Input.Clear -> Output.Clear
         | Input.Quit -> Output.Quit
     | Failure(msg, _, _) ->
@@ -52,7 +56,7 @@ let main _ =
         | Output.Result value ->
             print ConsoleColor.Yellow value
         | Output.Messages msgs ->
-            List.iter (print ConsoleColor.White) msgs
+            Seq.iter (print ConsoleColor.White) msgs
         | Output.Clear ->
             Console.Clear()
         | Output.Error msg ->
