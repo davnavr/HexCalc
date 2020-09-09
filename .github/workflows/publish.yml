@@ -29,14 +29,12 @@ jobs:
         PACKAGE_VERSION: ${{ steps.changelog.outputs.version }}
       run: dotnet fake run build.fsx -t Pack
     - name: Publish GitHub
-      uses: svenstaro/upload-release-action@v2
+      uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
+        artifacts: ./out/HexCalc.*
         body: ${{ steps.changelog.outputs.changes }}
-        file: ./out/HexCalc.*
-        file_glob: true
-        overwrite: true
         prerelease: ${{ steps.changelog.outputs.status == 'prereleased' }}
-        tag: ${{ github.ref }}
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish NuGet
       run: dotnet nuget push ./out/HexCalc.${{ steps.changelog.outputs.version }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
