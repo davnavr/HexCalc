@@ -31,6 +31,7 @@ jobs:
       run: dotnet tool restore
     - name: Build
       env:
+        PACKAGE_RELEASE_NOTES: ${{ steps.changelog.outputs.changes }}
         PACKAGE_VERSION: ${{ steps.changelog.outputs.version }}
       run: dotnet fake run build.fsx -t Pack
     - name: Publish GitHub
