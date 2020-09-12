@@ -32,7 +32,7 @@ type Integer =
             this.Value.CompareTo (other :?> Integer).Value
 
 [<StructuralComparison; StructuralEquality>]
-type Expression =
+type Expression = // TODO: Make an Error case for when an overflow or out of memory happens.
     | Integer of Integer
     | Add of Expression * Expression
     | Sub of Expression * Expression

@@ -6,10 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.0] -
+## [0.3.0] - 2020-09-
 ### Added
 - Different integer types ranging from byte to long and unsigned variants
-- `BigInteger` type used as the default underlying representation for integers to allow arbitrarily large numbers
+- Support for `BigInteger` type to allow arbitrarily large integers
 
 ## [0.2.0] - 2020-09-09
 ### Added
