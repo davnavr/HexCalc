@@ -31,25 +31,14 @@ type Integer =
         member this.CompareTo(other) =
             this.Value.CompareTo (other :?> Integer).Value
 
-[<StructuralComparison; StructuralEquality>]
-type Expression = // TODO: Make an Error case for when an overflow or out of memory happens.
-    | Integer of Integer
-    | Add of Expression * Expression
-    | Sub of Expression * Expression
-    | Mul of Expression * Expression
-    | Div of Expression * Expression
-    | Modulo of Expression * Expression
-    | Negate of Expression
-    | And of Expression * Expression
-    | Or of Expression * Expression
-    | Xor of Expression * Expression
-
 [<RequireQualifiedAccess>]
 type Input =
-    | Expr of Expression
+    | Expr of result: Integer
     | Help of term: string option
     | Clear
     | Quit
+    // Represents invalid input
+    // Invalid of unit
 
 [<RequireQualifiedAccess>]
 type Output =

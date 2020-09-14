@@ -21,15 +21,11 @@
   <ItemGroup>
     <Compile Include="Value.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="Parser.fs" />
     <Compile Include="Terms.fs" />
     <Compile Include="Parse.fs" />
     <Compile Include="Expr.fs" />
     <Compile Include="Program.fs" />
-  </ItemGroup>
-  
-  <!-- References -->
-  <ItemGroup>
-    <PackageReference Include="FParsec" Version="1.1.1" />
   </ItemGroup>
 
 </Project>
