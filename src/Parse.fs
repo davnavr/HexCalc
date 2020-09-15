@@ -1,126 +1,131 @@
-﻿[<RequireQualifiedAccess>]
-module HexCalc.Parse
+﻿module HexCalc.Parse
 
 open System
-open FParsec
 
-let private exprRef = OperatorPrecedenceParser<Expression, unit, unit>()
+type Reader =
+    { Position: uint
+      String: string }
 
-// TODO: Fix, overflow exception is thrown when number is too big.
-let private integer: Parser<_, unit> =
-    let bchar =
-        [ '0'; '1' ]
-        |> List.map pchar
-        |> choice
-        <?> "binary digit"
-    let digits p =
-        skipChar '_'
-        <?> "digit separator"
-        |> many1
-        |> sepBy1 (many1Chars p)
-        |>> String.Concat
-    let number nbase nvalue =
-        { Base = nbase; Value = nvalue}
-    choiceL
+    override this.ToString() = this.String.Substring(int this.Position)
+
+[<RequireQualifiedAccess>]
+module Reader =
+    let inline pos r = int r.Position
+
+    let inline move amt r =
+        { r with Position = r.Position + uint amt }
+
+    let nextStr len r =
+        if pos r + len <= r.String.Length then
+            Ok(r.String.Substring(pos r, len), move len r)
+        else
+            string r |> Error
+
+    let atEnd r = pos r >= r.String.Length
+
+type ParserError =
+    | UnexpectedEnd
+    | UnexpectedChar of char
+    | UnexpectedString of exp: string * act: string
+
+    override this.ToString() =
+        match this with
+        | UnexpectedEnd -> "Unexpected end of input"
+        | UnexpectedChar c ->
+            sprintf "Unexpected '%c' in input" c
+        | UnexpectedString(exp, act) ->
+            sprintf "Expected '%s', but got '%s'" exp act
+
+type Parser<'Result> = Reader -> Result<'Result * Reader, ParserError>
+
+let private strwhen cond (s: string) reader =
+    match Reader.nextStr s.Length reader with
+    | Ok (next, r) when cond s next -> Ok(s, r)
+    | Ok (bad, _)
+    | Error bad -> UnexpectedString(s, bad) |> Error
+
+let chr c: Parser<char> =
+    fun reader ->
+        if Reader.atEnd reader then
+            Error UnexpectedEnd
+        else
+            let result = reader.String.Chars (Reader.pos reader)
+            if result = c then
+                Ok(c, Reader.move 1 reader)
+            else
+                UnexpectedChar result |> Error
+
+let str: _ -> Parser<string> =
+    strwhen (=)
+let strci: _ -> Parser<string> =
+    strwhen (fun exp act -> exp.Equals(act, StringComparison.OrdinalIgnoreCase))
+
+let retn value: Parser<_> = fun reader -> Ok(value, reader)
+
+let (>>=) (p: Parser<_>) (binder: _ -> Parser<_>): Parser<_> =
+    fun reader ->
+        Result.bind
+            (fun (result, reader') -> binder result reader')
+            (p reader)
+
+let inline (|>>) p map =
+    p >>= (map >> retn)
+let inline (.>>.) p1 p2: Parser<_ * _> =
+    p1 >>= (fun r1 -> p2 |>> (fun r2 -> r1, r2))
+let inline (>>.) p1 p2 =
+    p1 .>>. p2 |>> snd
+
+let apply2 p pf: Parser<_> =
+    p
+    >>= fun result ->
+        pf |>> fun f -> f result
+
+let choice (ps: Parser<_> list) reader =
+    match ps with
+    | [] -> invalidArg "ps" "The parser list must not be empty"
+    | [ p ] -> p reader
+    | p :: tail ->
+        let rec inner p tail =
+            match (p reader, tail) with
+            | (Ok result, _) ->
+                Ok result
+            | (err, []) -> err
+            | (_, p' :: tail') ->
+                inner p' tail'
+        inner p tail
+
+let many p: Parser<_ list> =
+    let rec inner results reader =
+        match p reader with
+        | Ok (item, reader') ->
+            inner (item :: results) reader'
+        | Error _ ->
+            Ok(List.rev results, reader)
+    inner []
+let many1 p: Parser<_ list> =
+    p
+    >>= fun head ->
+        many p |>> fun tail -> head :: tail
+
+let sepBy1 p sep =
+    p
+    >>= fun head ->
+        many (sep >>. p) |>> fun tail -> head :: tail
+
+let dec =
+    List.map chr [ '0'..'9' ] |> choice
+
+let integer =
+    let digits pd =
+        sepBy1
+            (many1 pd)
+            (chr '_' |> many)
+        |>> List.collect id
+    choice
         [
-            skipStringCI "0b"
-            |> attempt
-            >>. digits bchar
-            <?> "binary"
-            |>> fun str ->
-                let rec parseb pow num =
-                    function
-                    | 0 -> num
-                    | i ->
-                        let index = i - 1
-                        let next =
-                            match str.Chars index with
-                            | '0' -> num
-                            | _ -> num + pown 2L pow
-                        parseb (pow + 1) next index
-                parseb 0 0L str.Length |> number Base2
+            //strci "0b"
 
-            skipStringCI "0x"
-            |> attempt
-            >>. digits hex
-            <?> "hexadecimal"
-            |>> fun str ->
-                let rec parseh pow num =
-                    function
-                    | 0 -> num
-                    | i ->
-                        let index = i - 1
-                        let n =
-                            let char =
-                                str.Chars index |> int64 ||| int64 ' '
-                            let offset =
-                                if char <= int64 '9' then int64 '0' else 87L
-                            char - offset
-                        parseh (pow + 1) (num + n * pown 16L pow) index
-                parseh 0 0L str.Length |> number Base16
+            //strci "0x"
 
-            digits digit
-            <?> "decimal"
-            |>> (Int64.Parse >> number Base10)
+            digits dec
         ]
-        "integer"
-
-let ws: Parser<unit, unit> =
-    [
-        skipAnyOf [ '('; ')' ]
-        spaces1
-    ]
-    |> choice
-
-let expr =
-    spaces >>. exprRef.ExpressionParser <?> "expression"
-
-let input =
-    let command names cmd =
-        List.map
-            (skipString >> attempt)
-            names
-        |> choice
-        >>% cmd
-    let help =
-        spaces1 >>. restOfLine false |> opt
-    [
-        expr |>> Input.Expr
-
-        command [ "clear"; "cls" ] Input.Clear
-        command [ "quit"; "exit" ] Input.Quit
-
-        skipString "help"
-        >>. help
-        |>> Input.Help
-    ]
-    |> choice
-    .>> eof
-
-do
-    let prefixOp op c prec =
-        PrefixOperator<_, _, _>(c, spaces, prec, true, fun ex -> op ex) :> Operator<_, _, _>
-    let infixOp op c prec =
-        InfixOperator<_, _, _>(c, spaces, prec, Associativity.Left, fun e1 e2 -> op(e1, e2)) :> Operator<_,_,_>
-    seq {
-        for op in Terms.operators do
-            let eoper =
-                match op.Operation with
-                | Terms.InfixOp oper -> infixOp oper
-                | Terms.PrefixOp oper -> prefixOp oper
-            eoper op.Symbol op.Precedence
-    }
-    |> Seq.iter exprRef.AddOperator
-
-    exprRef.TermParser <-
-        [
-            integer |>> Integer
-
-            skipChar '('
-            |> attempt
-            >>. expr
-            .>> skipChar ')'
-            <?> "nested expression"
-        ]
-        |> choice
-        .>> spaces
