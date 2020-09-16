@@ -77,7 +77,8 @@ let choice (ps: Parser<_> list) reader =
             let reader', result = p reader
             match (result, tail) with
             | (Ok item, _) -> reader', Ok item
-            | (err, _) when reader'.Position <> reader.Position -> reader', err
+            | (err, _) when reader'.Position <> reader.Position ->
+                reader', err
             | (err, []) -> reader', err
             | (_, p' :: tail') ->
                 inner p' tail'
@@ -132,18 +133,24 @@ let strci: _ -> Parser<string> =
 let integer: Parser<Integer> =
     let buildint (nbase: int) =
         let rec inner num =
+            let append (digit: int) =
+                (num * bigint nbase) + bigint digit
             function
             | [] -> num
             | [] :: tail -> inner num tail
+            | (digit :: tail) :: [] ->
+                inner (append digit) [ tail ]
             | (digit: int :: tail1) :: tail2 ->
-                let num' = (num * bigint nbase) + bigint digit
-                inner num' (tail1 :: tail2.Tail)
+                inner (append digit) (tail1 :: tail2.Tail)
         inner bigint.Zero
     let digits ibase (ds: char list) =
         let digit =
             List.mapi
                 (fun i d ->
-                    string d |> strci >>% i)
+                    string d
+                    |> strci
+                    |> attempt
+                    >>% i)
                 ds
             |> choice
         sepBy1
