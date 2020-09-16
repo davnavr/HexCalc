@@ -16,10 +16,12 @@ module Reader =
         { r with Position = r.Position + uint amt }
 
     let nextStr len r =
-        if pos r + len <= r.String.Length then
-            Ok(r.String.Substring(pos r, len), move len r)
-        else
-            string r |> Error
+        let str =
+            if pos r + len <= r.String.Length then
+                r.String.Substring(pos r, len) |> Ok
+            else
+                string r |> Error
+        move len r, str
 
     let atEnd r = pos r >= r.String.Length
 
@@ -36,38 +38,19 @@ type ParserError =
         | UnexpectedString(exp, act) ->
             sprintf "Expected '%s', but got '%s'" exp act
 
-type Parser<'Result> = Reader -> Result<'Result * Reader, ParserError>
+type Parser<'Result> = Reader -> Reader * Result<'Result, ParserError>
 
-let private strwhen cond (s: string) reader =
-    match Reader.nextStr s.Length reader with
-    | Ok (next, r) when cond s next -> Ok(s, r)
-    | Ok (bad, _)
-    | Error bad -> UnexpectedString(s, bad) |> Error
-
-let chr c: Parser<char> =
-    fun reader ->
-        if Reader.atEnd reader then
-            Error UnexpectedEnd
-        else
-            let result = reader.String.Chars (Reader.pos reader)
-            if result = c then
-                Ok(c, Reader.move 1 reader)
-            else
-                UnexpectedChar result |> Error
-
-let str: _ -> Parser<string> =
-    strwhen (=)
-let strci: _ -> Parser<string> =
-    strwhen (fun exp act -> exp.Equals(act, StringComparison.OrdinalIgnoreCase))
-
-let retn value: Parser<_> = fun reader -> Ok(value, reader)
+let retn value: Parser<_> = fun reader -> reader, Ok value
+let fail err: Parser<_> = fun reader -> reader, Error err
 
 let (>>=) (p: Parser<_>) (binder: _ -> Parser<_>): Parser<_> =
     fun reader ->
-        Result.bind
-            (fun (result, reader') -> binder result reader')
-            (p reader)
+        let reader', result = p reader
+        match result with
+        | Ok item -> binder item reader'
+        | Error err -> reader', Error err
 
+let inline (>>%) p item = p >>= fun _ -> retn item
 let inline (|>>) p map =
     p >>= (map >> retn)
 let inline (.>>.) p1 p2: Parser<_ * _> =
@@ -86,21 +69,28 @@ let choice (ps: Parser<_> list) reader =
     | [ p ] -> p reader
     | p :: tail ->
         let rec inner p tail =
-            match (p reader, tail) with
-            | (Ok result, _) ->
-                Ok result
-            | (err, []) -> err
+            let reader', result = p reader
+            match (result, tail) with
+            | (Ok item, _) -> reader', Ok item
+            | (err, _) when reader'.Position <> reader.Position -> reader', err
+            | (err, []) -> reader', err
             | (_, p' :: tail') ->
                 inner p' tail'
         inner p tail
 
+let attempt (p: Parser<_>): Parser<_> =
+    fun reader ->
+        match p reader with
+        | (reader', Ok item) -> reader', Ok item
+        | (_, err) -> reader, err
+
 let many p: Parser<_ list> =
     let rec inner results reader =
         match p reader with
-        | Ok (item, reader') ->
+        | (reader', Ok item) ->
             inner (item :: results) reader'
-        | Error _ ->
-            Ok(List.rev results, reader)
+        | (_, Error _) ->
+            reader, List.rev results |> Ok
     inner []
 let many1 p: Parser<_ list> =
     p
@@ -112,20 +102,60 @@ let sepBy1 p sep =
     >>= fun head ->
         many (sep >>. p) |>> fun tail -> head :: tail
 
-let dec =
-    List.map chr [ '0'..'9' ] |> choice
+let chr c: Parser<char> =
+    fun reader ->
+        if Reader.atEnd reader then
+            reader, Error UnexpectedEnd
+        else
+            let result = reader.String.Chars (Reader.pos reader)
+            let reader' = Reader.move 1 reader
+            if result = c then
+                reader', Ok c
+            else
+                reader', UnexpectedChar result |> Error
+
+let private strwhen cond (s: string) reader =
+    match Reader.nextStr s.Length reader with
+    | (reader', Ok next) when cond s next -> reader', Ok next
+    | (reader', Ok bad)
+    | (reader', Error bad) -> reader', UnexpectedString(s, bad) |> Error
+let str: _ -> Parser<string> =
+    strwhen (=)
+let strci: _ -> Parser<string> =
+    strwhen (fun exp act -> exp.Equals(act, StringComparison.OrdinalIgnoreCase))
 
 let integer =
-    let digits pd =
+    let buildint (nbase: int) =
+        let rec inner num =
+            function
+            | [] -> num
+            | [] :: tail -> inner num tail
+            | (digit: int :: tail1) :: tail2 ->
+                let num' = (num * bigint nbase) + bigint digit
+                inner num' (tail1 :: tail2.Tail)
+        inner bigint.Zero
+
+    let digits (ds: char list) =
+        let digit =
+            List.mapi
+                (fun i d ->
+                    string d |> strci >>% i)
+                ds
+            |> choice
         sepBy1
-            (many1 pd)
+            (many1 digit)
             (chr '_' |> many)
-        |>> List.collect id
+        |>> buildint (invalidOp "get length of ds")
     choice
         [
-            //strci "0b"
+            strci "0b"
+            |> attempt
+            >>. digits [ '0'; '1' ]
 
-            //strci "0x"
+            strci "0x"
+            |> attempt
+            >>. digits ([ '0'..'9' ] @ [ 'a'..'f' ])
 
-            digits dec
+            digits [ '0'..'9' ]
         ]
+    // TODO: Parse suffix.
