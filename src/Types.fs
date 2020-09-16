@@ -11,8 +11,9 @@ type Integer =
     { Base: Base
       Value: int64 }
 
+    // TODO: When the value is a bigint, use ToByteArray(?isUnsigned = true) to maybe get bytes as hex or binary.
     override this.ToString() =
-        let neg = 
+        let neg =
             if this.Value < 0L then " (negative)" else ""
         match this.Base with
         | Base10 -> string this.Value
@@ -37,8 +38,6 @@ type Input =
     | Help of term: string option
     | Clear
     | Quit
-    // Represents invalid input
-    // Invalid of unit
 
 [<RequireQualifiedAccess>]
 type Output =

@@ -40,6 +40,9 @@ type ParserError =
 
 type Parser<'Result> = Reader -> Reader * Result<'Result, ParserError>
 
+let runstr str (p: Parser<_>) =
+    p { Position = 0u; String = str } |> snd
+
 let retn value: Parser<_> = fun reader -> reader, Ok value
 let fail err: Parser<_> = fun reader -> reader, Error err
 
@@ -84,7 +87,7 @@ let attempt (p: Parser<_>): Parser<_> =
         | (reader', Ok item) -> reader', Ok item
         | (_, err) -> reader, err
 
-let many p: Parser<_ list> =
+let many (p: Parser<_>): Parser<_ list> =
     let rec inner results reader =
         match p reader with
         | (reader', Ok item) ->
@@ -124,7 +127,7 @@ let str: _ -> Parser<string> =
 let strci: _ -> Parser<string> =
     strwhen (fun exp act -> exp.Equals(act, StringComparison.OrdinalIgnoreCase))
 
-let integer =
+let integer: Parser<Integer> =
     let buildint (nbase: int) =
         let rec inner num =
             function
@@ -134,7 +137,6 @@ let integer =
                 let num' = (num * bigint nbase) + bigint digit
                 inner num' (tail1 :: tail2.Tail)
         inner bigint.Zero
-
     let digits (ds: char list) =
         let digit =
             List.mapi
@@ -145,7 +147,7 @@ let integer =
         sepBy1
             (many1 digit)
             (chr '_' |> many)
-        |>> buildint (invalidOp "get length of ds")
+        |>> buildint (List.length ds)
     choice
         [
             strci "0b"
@@ -158,4 +160,16 @@ let integer =
 
             digits [ '0'..'9' ]
         ]
-    // TODO: Parse suffix.
+    .>>. choice
+        [
+            retn (int32<bigint> >> Value.Int32)
+        ]
+    >>= fun (value, f) ->
+        try
+            let result =
+                f value
+                invalidOp "TODO: Create integer here."
+            retn result
+        with
+            | :? OverflowException ->
+                fail (invalidOp "TODO: What error should be used here?")

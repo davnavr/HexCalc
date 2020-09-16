@@ -64,7 +64,8 @@ module Value =
         | (_, UInt64 _) -> op ou64 uint64 UInt64
         | (Int64 _, _)
         | (_, Int64 _) -> op o64 int64 Int64
-        // TODO: Error if one is UInt32 and one is Int32
+        | (UInt32 _, Int32 _)
+        | (Int32 _, UInt32 _) -> invalidOp "TODO: Error if one is UInt32 and one is Int32"
         | (UInt32 _, _)
         | (_, UInt32 _) -> op ou32 uint32 UInt32
         | (Int32 _, _)
