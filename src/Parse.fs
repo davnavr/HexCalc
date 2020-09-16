@@ -138,10 +138,8 @@ let integer: Parser<Integer> =
             function
             | [] -> num
             | [] :: tail -> inner num tail
-            | (digit :: tail) :: [] ->
-                inner (append digit) [ tail ]
             | (digit: int :: tail1) :: tail2 ->
-                inner (append digit) (tail1 :: tail2.Tail)
+                inner (append digit) (tail1 :: tail2)
         inner bigint.Zero
     let digits ibase (ds: char list) =
         let digit =
@@ -172,7 +170,17 @@ let integer: Parser<Integer> =
         ]
     .>>. choice
         [
-            retn (int32<bigint> >> Value.Int32)
+            let suffix symbol itype vtype: Parser<bigint -> _> =
+                strci symbol
+                |> attempt
+                >>% (itype >> vtype)
+            
+            suffix "uy" uint8 Value.UInt8
+            suffix "ul" uint64 Value.UInt64
+            suffix "u" uint32 Value.UInt32
+            suffix "i" id Value.Big
+            suffix "l" int64 Value.Int64
+            retn (int32 >> Value.Int32)
         ]
     >>= fun ((ibase, value), f) ->
         try
@@ -183,7 +191,7 @@ let integer: Parser<Integer> =
         with
             | :? OverflowException ->
                 sprintf
-                    "'%A' is outside the range of allowed valuse for this type of integer."
+                    "'%A' is outside the range of allowed values for this type of integer."
                     value
                 |> ErrorMessage
                 |> fail
