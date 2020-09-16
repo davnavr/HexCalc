@@ -9,19 +9,11 @@ type Base =
 [<CustomComparison; CustomEquality>]
 type Integer =
     { Base: Base
-      Value: int64 }
+      Value: Value }
 
     // TODO: When the value is a bigint, use ToByteArray(?isUnsigned = true) to maybe get bytes as hex or binary.
-    override this.ToString() =
-        let neg =
-            if this.Value < 0L then " (negative)" else ""
-        match this.Base with
-        | Base10 -> string this.Value
-        | Base2 ->
-            let bits = System.Convert.ToString(this.Value, 2)
-            sprintf "0b%s%s" bits neg
-        | Base16 ->
-            sprintf "0x%X%s" this.Value neg
+    //override this.ToString() =
+    //    invalidOp "bad"
 
     override this.Equals(other) =
         this.Value = (other :?> Integer).Value
@@ -30,7 +22,7 @@ type Integer =
 
     interface System.IComparable with
         member this.CompareTo(other) =
-            this.Value.CompareTo (other :?> Integer).Value
+            compare this.Value (other :?> Integer).Value
 
 [<RequireQualifiedAccess>]
 type Input =

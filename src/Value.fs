@@ -1,7 +1,5 @@
 ﻿namespace rec HexCalc
 
-open System
-
 [<CustomComparison; CustomEquality>]
 type Value =
     | UInt8 of uint8
@@ -34,8 +32,9 @@ type Value =
 
     override this.GetHashCode() = this.BigValue.GetHashCode()
 
-    interface IComparable<Value> with
-        member this.CompareTo(other) = compare this.BigValue other.BigValue
+    interface System.IComparable with
+        member this.CompareTo(other) =
+            compare this.BigValue (other :?> Value).BigValue
 
     static member op_Explicit(num: Value) =
         num.Convert uint64 uint64 uint64 uint64 uint64 uint64

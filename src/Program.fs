@@ -1,7 +1,6 @@
 ﻿module HexCalc.Program
 
 open System
-open FParsec
 
 let private help =
     [
@@ -15,27 +14,7 @@ let private help =
     ]
 
 let input str =
-    match run Parse.input str with
-    | Success(result, _, _) ->
-        match result with
-        | Input.Expr ex ->
-            Expr.eval ex |> Output.Result
-        | Input.Help None -> Output.Messages help
-        | Input.Help (Some "all") ->
-            Terms.all
-            |> Map.toSeq
-            |> Seq.map (fst >> sprintf "- %s")
-            |> Output.Messages
-        | Input.Help (Some term) ->
-            match Terms.search term with
-            | Result.Ok desc ->
-                Output.Messages desc
-            | Result.Error _ ->
-                sprintf "Unknown term '%s'" term |> Output.Error
-        | Input.Clear -> Output.Clear
-        | Input.Quit -> Output.Quit
-    | Failure(msg, _, _) ->
-        Output.Error msg
+    Output.Error "TODO: Process input"
 
 let private readLine color () =
     Console.ForegroundColor <- color

@@ -29,6 +29,7 @@ type ParserError =
     | UnexpectedEnd
     | UnexpectedChar of char
     | UnexpectedString of exp: string * act: string
+    | ErrorMessage of string
 
     override this.ToString() =
         match this with
@@ -37,6 +38,7 @@ type ParserError =
             sprintf "Unexpected '%c' in input" c
         | UnexpectedString(exp, act) ->
             sprintf "Expected '%s', but got '%s'" exp act
+        | ErrorMessage msg -> msg
 
 type Parser<'Result> = Reader -> Reader * Result<'Result, ParserError>
 
@@ -137,7 +139,7 @@ let integer: Parser<Integer> =
                 let num' = (num * bigint nbase) + bigint digit
                 inner num' (tail1 :: tail2.Tail)
         inner bigint.Zero
-    let digits (ds: char list) =
+    let digits ibase (ds: char list) =
         let digit =
             List.mapi
                 (fun i d ->
@@ -147,29 +149,34 @@ let integer: Parser<Integer> =
         sepBy1
             (many1 digit)
             (chr '_' |> many)
-        |>> buildint (List.length ds)
+        |>> (fun digits ->
+            ibase, buildint (List.length ds) digits)
     choice
         [
             strci "0b"
             |> attempt
-            >>. digits [ '0'; '1' ]
+            >>. digits Base2 [ '0'; '1' ]
 
             strci "0x"
             |> attempt
-            >>. digits ([ '0'..'9' ] @ [ 'a'..'f' ])
+            >>. digits Base16 ([ '0'..'9' ] @ [ 'a'..'f' ])
 
-            digits [ '0'..'9' ]
+            digits Base10 [ '0'..'9' ]
         ]
     .>>. choice
         [
             retn (int32<bigint> >> Value.Int32)
         ]
-    >>= fun (value, f) ->
+    >>= fun ((ibase, value), f) ->
         try
             let result =
-                f value
-                invalidOp "TODO: Create integer here."
+                { Base = ibase
+                  Value = f value }
             retn result
         with
             | :? OverflowException ->
-                fail (invalidOp "TODO: What error should be used here?")
+                sprintf
+                    "'%A' is outside the range of allowed valuse for this type of integer."
+                    value
+                |> ErrorMessage
+                |> fail
