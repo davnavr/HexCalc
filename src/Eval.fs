@@ -42,7 +42,7 @@ exprRef :=
     >>= fun t1 ->
         [
             term
-            >>. fail (ErrorMessage "BAD")
+            >>. fail (ErrorMessage "BAD" |> ParserError.ofmsg)
 
             retn t1
         ]

@@ -25,7 +25,7 @@ module Reader =
 
     let atEnd r = pos r >= r.String.Length
 
-type ParserError =
+type ParserErrorMessage =
     | UnexpectedEnd
     | UnexpectedChar of char
     | UnexpectedString of exp: string * act: string
@@ -36,9 +36,27 @@ type ParserError =
         | UnexpectedEnd -> "Unexpected end of input"
         | UnexpectedChar c ->
             sprintf "Unexpected '%c' in input" c
+        | UnexpectedString(exp, "") ->
+            sprintf "Expected '%s', but the end of input" exp
         | UnexpectedString(exp, act) ->
             sprintf "Expected '%s', but got '%s'" exp act
         | ErrorMessage msg -> msg
+
+type ParserError =
+    { Context: string option
+      Message: ParserErrorMessage }
+
+    override this.ToString() =
+        match this with
+        | { Context = None; Message = err } ->
+            string err
+        | { Context = Some ctx; Message = ErrorMessage msg } ->
+            sprintf "Error while parsing %s: %s" ctx msg
+        | { Context = Some ctx; Message = err } ->
+            sprintf "%O while parsing %s" err ctx
+
+module ParserError =
+    let ofmsg err = { Context = None; Message = err }
 
 type Parser<'Result> = Reader -> Reader * Result<'Result, ParserError>
 
@@ -65,6 +83,15 @@ let inline (>>.) p1 p2 =
 let inline (.>>) p1 p2 =
     p1 .>>. p2 |>> fst
 
+let (<?>) (p: Parser<_>) name: Parser<_> =
+    fun reader ->
+        let reader', result = p reader
+        let result' =
+            Result.mapError
+                (fun err -> { err with Context = Some name })
+                result
+        reader', result'
+
 let apply2 p pf: Parser<_> =
     p
     >>= fun result ->
@@ -85,6 +112,7 @@ let choice (ps: Parser<_> list) reader =
             | (_, p' :: tail') ->
                 inner p' tail'
         inner p tail
+let choiceL ps name = choice ps <?> name
 
 let attempt (p: Parser<_>): Parser<_> =
     fun reader ->
@@ -120,14 +148,14 @@ let sepBy1 p sep =
 let chr c: Parser<char> =
     fun reader ->
         if Reader.atEnd reader then
-            reader, Error UnexpectedEnd
+            reader, ParserError.ofmsg UnexpectedEnd |> Error
         else
             let result = reader.String.Chars (Reader.pos reader)
             let reader' = Reader.move 1 reader
             if result = c then
                 reader', Ok c
             else
-                reader', UnexpectedChar result |> Error
+                reader', UnexpectedChar result |> ParserError.ofmsg |> Error
 
 let spaces: Parser<unit> =
     fun reader ->
@@ -141,7 +169,12 @@ let private strwhen cond (s: string) reader =
     match Reader.nextStr s.Length reader with
     | (reader', Ok next) when cond s next -> reader', Ok next
     | (reader', Ok bad)
-    | (reader', Error bad) -> reader', UnexpectedString(s, bad) |> Error
+    | (reader', Error bad) ->
+        let err =
+            UnexpectedString(s, bad)
+            |> ParserError.ofmsg
+            |> Error
+        reader', err
 let str: _ -> Parser<string> =
     strwhen (=)
 let strci: _ -> Parser<string> =
@@ -168,6 +201,7 @@ let integer: Parser<Integer> =
                     >>% i)
                 ds
             |> choice
+            <?> "digit"
         sepBy1
             (many1 digit)
             (chr '_' |> many)
@@ -185,7 +219,7 @@ let integer: Parser<Integer> =
 
             digits Base10 [ '0'..'9' ]
         ]
-    .>>. choice
+    .>>. choiceL
         [
             let suffix symbol itype vtype: Parser<bigint -> _> =
                 strci symbol
@@ -199,6 +233,7 @@ let integer: Parser<Integer> =
             suffix "l" int64 Value.Int64
             retn (int32 >> Value.Int32)
         ]
+        "suffix"
     >>= fun ((ibase, value), f) ->
         try
             let result =
@@ -211,4 +246,6 @@ let integer: Parser<Integer> =
                     "'%A' is outside the range of allowed values for this type of integer."
                     value
                 |> ErrorMessage
+                |> ParserError.ofmsg
                 |> fail
+    <?> "integer"
