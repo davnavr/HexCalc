@@ -62,6 +62,8 @@ let inline (.>>.) p1 p2: Parser<_ * _> =
     p1 >>= (fun r1 -> p2 |>> (fun r2 -> r1, r2))
 let inline (>>.) p1 p2 =
     p1 .>>. p2 |>> snd
+let inline (.>>) p1 p2 =
+    p1 .>>. p2 |>> fst
 
 let apply2 p pf: Parser<_> =
     p
@@ -89,6 +91,13 @@ let attempt (p: Parser<_>): Parser<_> =
         match p reader with
         | (reader', Ok item) -> reader', Ok item
         | (_, err) -> reader, err
+
+let forwarded() =
+    let rp: Parser<_> ref =
+        ref (fun _ -> invalidOp "The forwarded parser was not initalized")
+    let r: Parser<_> =
+        fun reader -> reader |> !rp
+    r, rp
 
 let many (p: Parser<_>): Parser<_ list> =
     let rec inner results reader =
@@ -119,6 +128,14 @@ let chr c: Parser<char> =
                 reader', Ok c
             else
                 reader', UnexpectedChar result |> Error
+
+let spaces: Parser<unit> =
+    fun reader ->
+        let amt =
+            [| ' ' |]
+            |> (string reader).Trim
+            |> String.length
+        Reader.move amt reader, Ok()
 
 let private strwhen cond (s: string) reader =
     match Reader.nextStr s.Length reader with

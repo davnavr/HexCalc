@@ -23,6 +23,7 @@
     <Compile Include="Types.fs" />
     <Compile Include="Parse.fs" />
     <Compile Include="Terms.fs" />
+    <Compile Include="Eval.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
