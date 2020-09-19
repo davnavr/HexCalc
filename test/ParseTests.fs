@@ -7,8 +7,13 @@ let testStr str p test =
         match Parse.runstr str p with
         | Ok result ->
             test result |> ignore
-        | Error err ->
-            string err |> AssertException |> raise
+        | Error(r, err) ->
+            sprintf
+                "Parser error at %O: %O"
+                r.Position
+                err
+            |> AssertException
+            |> raise
     )
 
 let testResults p data =

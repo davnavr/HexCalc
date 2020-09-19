@@ -42,6 +42,7 @@ exprRef :=
     >>= fun t1 ->
         [
             term
+            // TODO: Add infix operators here.
             >>. fail (ErrorMessage "BAD" |> ParserError.ofmsg)
 
             retn t1

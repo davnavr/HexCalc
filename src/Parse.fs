@@ -14,6 +14,8 @@ module Reader =
 
     let inline move amt r =
         { r with Position = r.Position + uint amt }
+    
+    let atEnd r = pos r >= r.String.Length
 
     let nextStr len r =
         let str =
@@ -22,8 +24,10 @@ module Reader =
             else
                 string r |> Error
         move len r, str
-
-    let atEnd r = pos r >= r.String.Length
+    let nextChr r =
+        if atEnd r
+        then None
+        else Some(move 1 r, r.String.Chars(pos r))
 
 type ParserErrorMessage =
     | UnexpectedEnd
@@ -61,7 +65,11 @@ module ParserError =
 type Parser<'Result> = Reader -> Reader * Result<'Result, ParserError>
 
 let runstr str (p: Parser<_>) =
-    p { Position = 0u; String = str } |> snd
+    let reader, result =
+        p { Position = 0u; String = str }
+    match result with
+    | Ok item -> Ok item
+    | Error err -> Error(reader, err)
 
 let retn value: Parser<_> = fun reader -> reader, Ok value
 let fail err: Parser<_> = fun reader -> reader, Error err
@@ -137,31 +145,47 @@ let many (p: Parser<_>): Parser<_ list> =
     inner []
 let many1 p: Parser<_ list> =
     p
+    //<?> "HEADMANY1" // NOTE: This p fails when parsing expression.
     >>= fun head ->
         many p |>> fun tail -> head :: tail
 
 let sepBy1 p sep =
     p
+    //<?> "HEADSEPBY1" // NOTE: This fails too, and might hide HEADMANY1?
     >>= fun head ->
         many (sep >>. p) |>> fun tail -> head :: tail
 
-let chr c: Parser<char> =
+let anych: Parser<char> =
     fun reader ->
-        if Reader.atEnd reader then
+        match Reader.nextChr reader with
+        | None ->
             reader, ParserError.ofmsg UnexpectedEnd |> Error
+        | Some(reader', ch) ->
+            reader', Ok ch
+let chr c: Parser<char> =
+    anych
+    >>= fun act ->
+        if act = c then
+            retn c
         else
-            let result = reader.String.Chars (Reader.pos reader)
-            let reader' = Reader.move 1 reader
-            if result = c then
-                reader', Ok c
-            else
-                reader', UnexpectedChar result |> ParserError.ofmsg |> Error
+            UnexpectedChar act
+            |> ParserError.ofmsg
+            |> fail
+let chrci c: Parser<char> =
+    anych
+    >>= fun act ->
+        if Char.ToLowerInvariant act = Char.ToLowerInvariant c
+        then retn act
+        else
+            UnexpectedChar act
+            |> ParserError.ofmsg
+            |> fail
 
 let spaces: Parser<unit> =
     fun reader ->
         let amt =
             [| ' ' |]
-            |> (string reader).Trim
+            |> (string reader).TrimStart
             |> String.length
         Reader.move amt reader, Ok()
 
@@ -195,15 +219,14 @@ let integer: Parser<Integer> =
         let digit =
             List.mapi
                 (fun i d ->
-                    string d
-                    |> strci
+                    chrci d
                     |> attempt
                     >>% i)
                 ds
             |> choice
             <?> "digit"
         sepBy1
-            (many1 digit)
+            (many1 digit) // TODO: For some reason, this parser keeps consuming until end of input when evaluating expression.
             (chr '_' |> many)
         |>> (fun digits ->
             ibase, buildint (List.length ds) digits)
