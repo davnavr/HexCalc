@@ -33,17 +33,61 @@ let operators =
             "-", PrefixOp bigint.Negate, 5, "negation", "returns the opposite of its operand, which is the operand multiplied by -1", "-5", "-5"
         ]
 
+type FunctionBody =
+    | Arity1 of string * (Integer -> Integer)
+
+    override this.ToString() =
+        match this with
+        | Arity1(arg, _) -> arg
+
+type Function =
+    { Body: FunctionBody
+      Description: string
+      Example: string * string
+      Name: string }
+
+    override this.ToString() =
+        sprintf "%s(%O)" this.Name this.Body
+
+let functions =
+    List.map
+        (fun (name, body, desc, example, result) ->
+            { Body = body
+              Description = desc
+              Example = (example, result)
+              Name = name })
+        [
+            let setbase nbase =
+                Arity1("value", fun value -> { value with Base = nbase })
+            "dec", setbase Base10, "Converts its argument into a decimal (base 10) integer.", "dec(0xA)", "10"
+            "hex", setbase Base16, "Converts its argument into a hexadecimal (base 16) integer.", "hex(15)", "0xF"
+            "bin", setbase Base2, "Converts its argument into a binary (base 2) integer.", "bin(3)", "0b11"
+        ]
+
 let all: Map<string, string list> =
-    Map.empty
+    let defterm desc (example: string * string) =
+        [
+            yield! desc
+            "Example:"
+            sprintf "> %s" (fst example)
+            snd example
+        ]
+
+    [
+        for f in functions do
+            let info =
+                defterm
+                    [ string f; f.Description ]
+                    f.Example
+            f.Name, info
+    ]
+    |> Map.ofList
     |> List.foldBack
-        (fun op terms ->
+        (fun (op: Operator) terms ->
             let text =
-                [
-                    sprintf "The %s operator, %s." op.Name op.Description
-                    "Example:"
-                    sprintf "> %s" (fst op.Example)
-                    snd op.Example
-                ]
+                defterm
+                    [ sprintf "The %s operator, %s." op.Name op.Description ]
+                    op.Example
             let desc =
                 match Map.tryFind op.Symbol terms with
                 | Some existing -> existing @ text

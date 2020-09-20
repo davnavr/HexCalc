@@ -50,13 +50,6 @@ let private integer: Parser<_, unit> =
         ]
         "integer"
 
-let private ws: Parser<unit, unit> =
-    [
-        skipAnyOf [ '('; ')' ]
-        spaces1
-    ]
-    |> choice
-
 let expr =
     spaces >>. exprRef.ExpressionParser <?> "expression"
 
@@ -113,6 +106,32 @@ do
             >>. expr
             .>> skipChar ')'
             <?> "nested expression"
+
+            choice
+                [
+                    for f in Terms.functions do
+                        skipString f.Name
+                        |> attempt
+                        >>. spaces
+                        >>. skipChar '('
+                        >>. sepBy1 expr (skipChar ',')
+                        .>> skipChar ')'
+                        >>= fun args ->
+                            match (f.Body, args) with
+                            | (Terms.Arity1(_, op), [ arg ]) ->
+                                op arg |> preturn
+                            | _ ->
+                                let exp =
+                                    match f.Body with
+                                    | Terms.Arity1 _ -> 1
+                                sprintf
+                                    "The function '%s' expects %i arguments, but got %i"
+                                    f.Name
+                                    exp
+                                    args.Length
+                                |> fail
+                ]
+            <?> "function call"
         ]
         |> choice
         .>> spaces

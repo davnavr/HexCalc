@@ -32,6 +32,9 @@ let tests =
         "0b0110 | 0x1", Base2, 7I
         "0x3 ^ 0b1100", Base2, 15I
         "10 % 7", Base10, 3I
+        "dec(0xA)", Base10, 10I
+        "hex(15)", Base16, 15I
+        "bin(5)", Base2, 5I
     ]
     |> List.map (fun (str, expbase, expval) ->
         fun actual ->
@@ -40,5 +43,4 @@ let tests =
                   Value = expval }
             Assert.Equal("correct value", expected, actual)
         |> testStr str)
-    |> testList "expression"
-    // |> testList "evaluation"
+    |> testList "expression evaluation"
