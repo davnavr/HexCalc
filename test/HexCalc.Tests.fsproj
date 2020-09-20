@@ -9,8 +9,8 @@
 
   <!-- Source files -->
   <ItemGroup>
-    <Compile Include="ParseTests.fs" />
-    <Compile Include="ExprTests.fs" />
+    <Compile Include="IntegerTests.fs" />
+    <Compile Include="EvalTests.fs" />
     <Compile Include="Test.fs" />
   </ItemGroup>
   

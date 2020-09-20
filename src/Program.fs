@@ -15,11 +15,10 @@ let private help =
     ]
 
 let input str =
-    match run Parse.input str with
+    match run Eval.input str with
     | Success(result, _, _) ->
         match result with
-        | Input.Expr ex ->
-            Expr.eval ex |> Output.Result
+        | Input.Eval ex -> string ex |> Output.Result
         | Input.Help None -> Output.Messages help
         | Input.Help (Some "all") ->
             Terms.all
