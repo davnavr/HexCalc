@@ -12,9 +12,25 @@ type Integer =
       Value: bigint }
 
     override this.ToString() =
-        match this.Base with
-        | Base10 -> string this.Value
-        | _ -> invalidOp "TODO: Add support for binary and hexadecimal, taking to account the weird behavior when the value is negative."
+        let rec bstr f pfx (value: bigint): string =
+            match value.Sign with
+            | 0
+            | 1 ->
+                value.ToByteArray()
+                |> Seq.map f
+                |> Seq.rev
+                |> String.concat ""
+                |> sprintf "%s%s" pfx
+            | _ ->
+                -value |> bstr f pfx |> sprintf "-%s"
+        let str =
+            match this.Base with
+            | Base10 -> string
+            | Base16 ->
+                bstr (sprintf "%X") "0x"
+            | Base2 ->
+                bstr (fun b -> System.Convert.ToString(b, 2)) "0b"
+        str this.Value
 
     override this.Equals(other) =
         this.Value = (other :?> Integer).Value
