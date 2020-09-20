@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2020-09-19
+### Added
+- `BigInteger` is now used as underlying integer type instead of Int64, allowing for a larger range of possible values
+- Hexadecimal and Binary integers are no longer negative when the sign bit is set
+- Negative hexadecimal and binary integers no longer set the sign bit in the output
+
 ## [0.2.0] - 2020-09-09
 ### Added
 - Help subcommand can now list all available operators or display a description for each
