@@ -35,6 +35,9 @@ let tests =
         "dec(0xA)", Base10, 10I
         "hex(15)", Base16, 15I
         "bin(5)", Base2, 5I
+        "dec  ( 0xFE + 1)", Base10, 255I
+        "pow (2, 16)", Base10, 65536I
+        "pow (0x10, 2) ", Base16, 256I
     ]
     |> List.map (fun (str, expbase, expval) ->
         fun actual ->

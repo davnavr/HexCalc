@@ -35,10 +35,12 @@ let operators =
 
 type FunctionBody =
     | Arity1 of string * (Integer -> Integer)
+    | Arity2 of string * string * (Integer -> Integer -> Integer)
 
     override this.ToString() =
         match this with
         | Arity1(arg, _) -> arg
+        | Arity2(arg1, arg2, _) -> sprintf "%s, %s" arg1 arg2
 
 type Function =
     { Body: FunctionBody
@@ -62,6 +64,7 @@ let functions =
             "dec", setbase Base10, "Converts its argument into a decimal (base 10) integer.", "dec(0xA)", "10"
             "hex", setbase Base16, "Converts its argument into a hexadecimal (base 16) integer.", "hex(15)", "0xF"
             "bin", setbase Base2, "Converts its argument into a binary (base 2) integer.", "bin(3)", "0b11"
+            "pow", Arity2("base", "exponent", fun ibase iexp -> { ibase with Value = bigint.Pow(ibase.Value, int iexp.Value) }), "Returns the first argument to the power of the second argument. Large exponents may cause the program to crash.", "pow(2, 4)", "16"
         ]
 
 let all: Map<string, string list> =

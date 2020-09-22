@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hexadecimal and Binary integers are no longer negative when the sign bit is set
 - Negative hexadecimal and binary integers no longer set the sign bit in the output
 - Added conversion functions that change the base of integers
+- Added `pow` function to raise integers to a power
 
 ## [0.2.0] - 2020-09-09
 ### Added

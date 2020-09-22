@@ -86,7 +86,6 @@ let private infixOp op c prec =
     InfixOperator<_, _, _>(c, spaces, prec, Associativity.Left, op') :> Operator<_,_,_>
 
 do
-    
     seq {
         for op in Terms.operators do
             let eoper =
@@ -120,10 +119,13 @@ do
                             match (f.Body, args) with
                             | (Terms.Arity1(_, op), [ arg ]) ->
                                 op arg |> preturn
+                            | (Terms.Arity2(_, _, op), [ arg1; arg2 ]) ->
+                                op arg1 arg2 |> preturn
                             | _ ->
                                 let exp =
                                     match f.Body with
                                     | Terms.Arity1 _ -> 1
+                                    | Terms.Arity2 _ -> 2
                                 sprintf
                                     "The function '%s' expects %i arguments, but got %i"
                                     f.Name
