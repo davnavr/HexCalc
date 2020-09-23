@@ -38,6 +38,8 @@ let tests =
         "dec  ( 0xFE + 1)", Base10, 255I
         "pow (2, 16)", Base10, 65536I
         "pow (0x10, 2) ", Base16, 256I
+        "abs(-9)", Base10, 9I
+        "abs ( -0b101 + 15)", Base2, 10I
     ]
     |> List.map (fun (str, expbase, expval) ->
         fun actual ->

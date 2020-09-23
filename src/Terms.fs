@@ -65,6 +65,7 @@ let functions =
             "hex", setbase Base16, "Converts its argument into a hexadecimal (base 16) integer.", "hex(15)", "0xF"
             "bin", setbase Base2, "Converts its argument into a binary (base 2) integer.", "bin(3)", "0b11"
             "pow", Arity2("base", "exponent", fun ibase iexp -> { ibase with Value = bigint.Pow(ibase.Value, int iexp.Value) }), "Returns the first argument to the power of the second argument. Large exponents may cause the program to crash.", "pow(2, 4)", "16"
+            "abs", Arity1("i", fun value -> { value with Value = abs value.Value }), "Returns the absolute value of an integer.", "abs(-7)", "7"
         ]
 
 let all: Map<string, string list> =

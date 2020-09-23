@@ -6,13 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.0] - 2020-09-19
+## [0.3.0] - 2020-09-22
 ### Added
 - `BigInteger` is now used as underlying integer type instead of Int64, allowing for a larger range of possible values
 - Hexadecimal and Binary integers are no longer negative when the sign bit is set
 - Negative hexadecimal and binary integers no longer set the sign bit in the output
 - Added conversion functions that change the base of integers
 - Added `pow` function to raise integers to a power
+- Added `abs` function to get the absolute value of integers
 
 ## [0.2.0] - 2020-09-09
 ### Added
