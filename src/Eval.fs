@@ -50,6 +50,24 @@ let private integer: Parser<_, State> =
         ]
         "integer"
 
+let private varname: Parser<string, _> =
+    let after =
+        [
+            letter
+            digit
+            pchar '_'
+        ]
+        |> choice
+        |> many
+    pipe2
+        (attempt upper)
+        after
+        (fun head tail ->
+            head :: tail
+            |> List.toArray
+            |> System.String)
+    <?> "variable name"
+
 let expr =
     spaces >>. exprRef.ExpressionParser <?> "expression"
 
@@ -63,6 +81,17 @@ let input =
     let help =
         spaces1 >>. restOfLine false |> opt
     [
+        varname
+        .>> spaces
+        .>> skipChar '='
+        |> attempt
+        .>>. expr
+        >>= fun (name, value) ->
+            State.setVar name value
+            |> updateUserState
+            >>% (Command.Eval value |> Input)
+        <?> "variable assignment"
+
         expr
         >>= fun e ->
             fun state ->
@@ -143,6 +172,12 @@ do
                                 |> fail
                 ]
             <?> "function call"
+
+            pipe2
+                varname
+                getUserState
+                State.getVar
+            <?> "variable"
         ]
         |> choice
         .>> spaces

@@ -7,7 +7,8 @@ let tests =
         let outint value = Output.Result { Base = Base10; Value = value }
 
         [ "1 + 2"; "ans * 3"; "quit" ], [ outint 3I; outint 9I ]
-        [ "17"; "clear"; "1 + ans"; "quit" ], [ outint 17I; Output.Clear; outint 18I; ]
+        [ "17"; "clear"; "1 + ans"; "quit" ], [ outint 17I; Output.Clear; outint 18I ]
+        [ "Hello"; "Hello = 5 * 2"; "Hello + 1"; "quit" ], [ outint 0I; outint 10I; outint 11I ]
 
         let rep =
             [

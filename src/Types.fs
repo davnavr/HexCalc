@@ -62,9 +62,3 @@ type Output =
     | Error of msg: string
     | Messages of lines: string list
     | Clear
-
-type State =
-    { Answer: Integer }
-
-    static member Default =
-        { Answer = Integer.Zero }
