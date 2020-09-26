@@ -51,15 +51,17 @@ type Command =
     | Help of term: string option
     | Clear
 
+[<StructuralComparison; StructuralEquality>]
 type Input =
     | Input of Command
     | Quit
 
 [<RequireQualifiedAccess>]
+[<StructuralComparison; StructuralEquality>]
 type Output =
-    | Result of string
+    | Result of Integer
     | Error of msg: string
-    | Messages of lines: seq<string>
+    | Messages of lines: string list
     | Clear
 
 type State =

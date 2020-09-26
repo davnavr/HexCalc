@@ -3,9 +3,9 @@ module HexCalc.Eval
 
 open FParsec
 
-let private exprRef = OperatorPrecedenceParser<Integer, unit, unit>() // TODO: Parser state should be a State instead of unit.
+let private exprRef = OperatorPrecedenceParser<Integer, unit, State>() // TODO: Parser state should be a State instead of unit.
 
-let private digits ibase (ds: char[]): Parser<_, unit> =
+let private digits ibase (ds: char[]): Parser<_, State> =
     let baseval = bigint ds.Length
     let rec buildint num =
         function
@@ -33,7 +33,7 @@ let private digits ibase (ds: char[]): Parser<_, unit> =
         { Base = ibase
           Value = buildint bigint.Zero digits })
 
-let private integer: Parser<_, unit> =
+let private integer: Parser<_, State> =
     choiceL
         [
             let dec = [| '0'..'9' |]
@@ -63,7 +63,13 @@ let input =
     let help =
         spaces1 >>. restOfLine false |> opt
     [
-        expr |>> (Command.Eval >> Input)
+        //expr |>> (Command.Eval >> Input)
+        expr
+        >>= fun e ->
+            fun state ->
+                { state with Answer = e }
+            |> updateUserState
+            >>% (Command.Eval e |> Input)
 
         command [ "clear"; "cls" ] (Input Command.Clear)
         command [ "quit"; "exit" ] Input.Quit
@@ -99,6 +105,10 @@ do
     exprRef.TermParser <-
         [
             integer
+
+            skipString "ans"
+            >>. getUserState
+            |>> fun state -> state.Answer
 
             skipChar '('
             |> attempt

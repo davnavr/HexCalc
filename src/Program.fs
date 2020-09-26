@@ -1,4 +1,5 @@
-﻿module HexCalc.Program
+﻿[<RequireQualifiedAccess>]
+module HexCalc.Program
 
 open System
 open FParsec
@@ -14,29 +15,27 @@ let private help =
         "'quit' or 'exit' - Quits the application"
     ]
 
+let private terms =
+    Terms.all
+    |> Map.toList
+    |> List.map (fst >> sprintf "- %s")
+
 let private print color (msg: obj) =
     Console.ForegroundColor <- color
     Console.WriteLine msg
 
-// TODO: Add tests that call this function, ensuring that 'ans' functions properly.
-// TODO: Tests that call this function should test that it is tail recursive (does not throw an SO Exception).
-let rec start inf outf (state: State) ins outs =
+let rec start inf outf ins outs (state: State) = // TODO: Fix, ensure that this is tail recursive.
     let instr, ins' = inf ins
-    let cont = start inf outf state ins'
-    match run Eval.input instr with
-    | Success(input, _, _) ->
+    let cont = outf outs >> start inf outf ins'
+    match runParserOnString Eval.input state "" instr with
+    | Success(input, state', _) ->
         match input with
         | Input cmd ->
-            let outs' =
+            let output =
                 match cmd with
-                | Command.Eval result ->
-                    string result |> Output.Result
+                | Command.Eval result -> Output.Result result
                 | Command.Help None -> Output.Messages help
-                | Command.Help (Some "all") ->
-                    Terms.all
-                    |> Map.toSeq
-                    |> Seq.map (fst >> sprintf "- %s")
-                    |> Output.Messages
+                | Command.Help (Some "all") -> Output.Messages terms
                 | Command.Help (Some term) ->
                     match Terms.search term with
                     | Result.Ok desc ->
@@ -44,12 +43,11 @@ let rec start inf outf (state: State) ins outs =
                     | Result.Error _ ->
                         sprintf "Unknown term '%s'" term |> Output.Error
                 | Command.Clear -> Output.Clear
-                |> outf outs
-            cont outs'
-        | Input.Quit -> (state, ins', outs)
+            cont output state'
+        | Input.Quit -> state, ins', outs
     | Failure(msg, _, _) ->
-        let outs' = Output.Error msg |> outf outs
-        cont outs'
+        let err = Output.Error msg
+        cont err state
 
 [<EntryPoint>]
 let main _ =
@@ -73,8 +71,8 @@ let main _ =
     start
         readin
         writeout
-        State.Default
         true
         ()
+        State.Default
     |> ignore
     0

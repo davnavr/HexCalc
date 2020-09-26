@@ -83,7 +83,9 @@ let all: Map<string, string list> =
                 defterm
                     [ string f; f.Description ]
                     f.Example
-            f.Name, info
+            yield f.Name, info
+
+        yield "ans", [ "Contains the value of the expression that was last evaluated"; "Example:"; "> 7 - 5"; "2"; "> 1 + ans"; "3" ]
     ]
     |> Map.ofList
     |> List.foldBack

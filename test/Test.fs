@@ -2,10 +2,11 @@
 
 open Fuchu
 
-let tests =
+let private tests =
     [
         IntegerTests.tests
         EvalTests.tests
+        ProgramTests.tests
     ]
     |> testList "tests"
 
