@@ -17,15 +17,15 @@ type Integer =
 
     override this.ToString() =
         let bstr f pfx (value: bigint) =
-            let value' =
+            let sign, value' =
                 match value.Sign with
-                | -1 -> -value
-                | _ -> value
+                | -1 -> "-", -value
+                | _ -> "", value
             value'.ToByteArray()
             |> Seq.map f
             |> Seq.rev
             |> String.concat ""
-            |> sprintf "%s%s" pfx
+            |> sprintf "%s%s%s" sign pfx
         let str =
             match this.Base with
             | Base10 -> string
