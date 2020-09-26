@@ -88,19 +88,21 @@ let input =
         .>>. expr
         >>= fun (name, value) ->
             State.setVar name value
+            >> State.setAns value
             |> updateUserState
             >>% (Command.Eval value |> Input)
         <?> "variable assignment"
 
         expr
         >>= fun e ->
-            fun state ->
-                { state with Answer = e }
+            State.setAns e
             |> updateUserState
             >>% (Command.Eval e |> Input)
 
         command [ "clear"; "cls" ] (Input Command.Clear)
         command [ "quit"; "exit" ] Input.Quit
+
+        // TODO: Add command to list all variables.
 
         skipString "help"
         >>. help

@@ -9,6 +9,9 @@ type State =
           Variables = Map.empty }
 
 module State =
+    let setAns ans state =
+        { state with Answer = ans }
+
     let private updateVars f state =
         { state with Variables = f state.Variables }
     let setVar name (value: Integer) =
