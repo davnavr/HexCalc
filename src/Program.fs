@@ -24,14 +24,14 @@ let private print color (msg: obj) =
     Console.ForegroundColor <- color
     Console.WriteLine msg
 
-let rec start inf outf ins outs (state: State) = // TODO: Fix, ensure that this is tail recursive.
+let rec start inf outf ins outs (state: State) =
     let instr, ins' = inf ins
-    let cont = outf outs >> start inf outf ins'
-    match runParserOnString Eval.input state "" instr with
-    | Success(input, state', _) ->
-        match input with
-        | Input cmd ->
-            let output =
+    let (state', msg) =
+        match runParserOnString Eval.input state "" instr with
+        | Success(input, state', _) ->
+            state',
+            match input with
+            | Input cmd ->
                 match cmd with
                 | Command.Eval result -> Output.Result result
                 | Command.Help None -> Output.Messages help
@@ -43,11 +43,16 @@ let rec start inf outf ins outs (state: State) = // TODO: Fix, ensure that this 
                     | Result.Error _ ->
                         sprintf "Unknown term '%s'" term |> Output.Error
                 | Command.Clear -> Output.Clear
-            cont output state'
-        | Input.Quit -> state, ins', outs
-    | Failure(msg, _, _) ->
-        let err = Output.Error msg
-        cont err state
+                |> Some
+            | Input.Quit -> None
+        | Failure(msg, _, _) ->
+            state, Output.Error msg |> Some
+    match msg with
+    | Some output ->
+        let outs' = outf outs output
+        start inf outf ins' outs' state'
+    | None ->
+        state', ins', outs
 
 [<EntryPoint>]
 let main _ =
