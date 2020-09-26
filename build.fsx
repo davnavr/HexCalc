@@ -54,8 +54,6 @@ Target.create "Build" (fun _ ->
                         Properties =
                             [
                                 "Version", version
-                                if String.isNotNullOrEmpty notes then
-                                    "PackageReleaseNotes", notes
                             ]}
                 NoRestore = true })
         slnFile
@@ -78,8 +76,8 @@ Target.create "Pack" (fun _ ->
                         Properties =
                             [
                                 "PackageVersion", version
-
-
+                                if String.isNotNullOrEmpty notes then
+                                    "PackageReleaseNotes", notes
                             ]}
                 NoBuild = true
                 NoRestore = true
