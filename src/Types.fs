@@ -16,17 +16,16 @@ type Integer =
           Value = bigint.Zero }
 
     override this.ToString() =
-        let rec bstr f pfx (value: bigint): string =
-            match value.Sign with
-            | 0
-            | 1 ->
-                value.ToByteArray()
-                |> Seq.map f
-                |> Seq.rev
-                |> String.concat ""
-                |> sprintf "%s%s" pfx
-            | _ ->
-                -value |> bstr f pfx |> sprintf "-%s"
+        let bstr f pfx (value: bigint) =
+            let value' =
+                match value.Sign with
+                | -1 -> -value
+                | _ -> value
+            value'.ToByteArray()
+            |> Seq.map f
+            |> Seq.rev
+            |> String.concat ""
+            |> sprintf "%s%s" pfx
         let str =
             match this.Base with
             | Base10 -> string
