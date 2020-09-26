@@ -7,7 +7,7 @@ open FParsec
 
 let testStr str test =
     testCase str (fun() ->
-        match run Eval.expr str with
+        match runParserOnString Eval.expr State.Default "" str with
         | Success(result, _, _) ->
             test result |> ignore
         | Failure(msg, _, _) ->
@@ -40,6 +40,7 @@ let tests =
         "pow (0x10, 2) ", Base16, 256I
         "abs(-9)", Base10, 9I
         "abs ( -0b101 + 15)", Base2, 10I
+        "ans + 0b0001_1010", Base2, 26I
     ]
     |> List.map (fun (str, expbase, expval) ->
         fun actual ->

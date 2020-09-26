@@ -11,6 +11,10 @@ type Integer =
     { Base: Base
       Value: bigint }
 
+    static member Zero =
+        { Base = Base10
+          Value = bigint.Zero }
+
     override this.ToString() =
         let rec bstr f pfx (value: bigint): string =
             match value.Sign with
@@ -42,16 +46,26 @@ type Integer =
             this.Value.CompareTo (other :?> Integer).Value
 
 [<RequireQualifiedAccess>]
-type Input =
+type Command =
     | Eval of result: Integer
     | Help of term: string option
     | Clear
+
+[<StructuralComparison; StructuralEquality>]
+type Input =
+    | Input of Command
     | Quit
 
 [<RequireQualifiedAccess>]
+[<StructuralComparison; StructuralEquality>]
 type Output =
-    | Result of string
+    | Result of Integer
     | Error of msg: string
-    | Messages of lines: seq<string>
+    | Messages of lines: string list
     | Clear
-    | Quit
+
+type State =
+    { Answer: Integer }
+
+    static member Default =
+        { Answer = Integer.Zero }

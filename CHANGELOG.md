@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- 'ans' keyword that refers to the value of the previous evaluated expression
+
 ## [0.3.0] - 2020-09-22
 ### Added
 - `BigInteger` is now used as underlying integer type instead of Int64, allowing for a larger range of possible values
