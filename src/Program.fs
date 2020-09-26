@@ -14,44 +14,54 @@ let private help =
         "'quit' or 'exit' - Quits the application"
     ]
 
-let input str =
-    match run Eval.input str with
-    | Success(result, _, _) ->
-        match result with
-        | Input.Eval ex -> string ex |> Output.Result
-        | Input.Help None -> Output.Messages help
-        | Input.Help (Some "all") ->
-            Terms.all
-            |> Map.toSeq
-            |> Seq.map (fst >> sprintf "- %s")
-            |> Output.Messages
-        | Input.Help (Some term) ->
-            match Terms.search term with
-            | Result.Ok desc ->
-                Output.Messages desc
-            | Result.Error _ ->
-                sprintf "Unknown term '%s'" term |> Output.Error
-        | Input.Clear -> Output.Clear
-        | Input.Quit -> Output.Quit
-    | Failure(msg, _, _) ->
-        Output.Error msg
-
-let private readLine color () =
-    Console.ForegroundColor <- color
-    Console.Write "> "
-    Console.ReadLine()
-
 let private print color (msg: obj) =
     Console.ForegroundColor <- color
     Console.WriteLine msg
 
+// TODO: Add tests that call this function, ensuring that 'ans' functions properly.
+// TODO: Tests that call this function should test that it is tail recursive (does not throw an SO Exception).
+let rec start inf outf (state: State) ins outs =
+    let instr, ins' = inf ins
+    let cont = start inf outf state ins'
+    match run Eval.input instr with
+    | Success(input, _, _) ->
+        match input with
+        | Input cmd ->
+            let outs' =
+                match cmd with
+                | Command.Eval result ->
+                    string result |> Output.Result
+                | Command.Help None -> Output.Messages help
+                | Command.Help (Some "all") ->
+                    Terms.all
+                    |> Map.toSeq
+                    |> Seq.map (fst >> sprintf "- %s")
+                    |> Output.Messages
+                | Command.Help (Some term) ->
+                    match Terms.search term with
+                    | Result.Ok desc ->
+                        Output.Messages desc
+                    | Result.Error _ ->
+                        sprintf "Unknown term '%s'" term |> Output.Error
+                | Command.Clear -> Output.Clear
+                |> outf outs
+            cont outs'
+        | Input.Quit -> (state, ins', outs)
+    | Failure(msg, _, _) ->
+        let outs' = Output.Error msg |> outf outs
+        cont outs'
+
 [<EntryPoint>]
 let main _ =
-    printfn "Type 'help' for help"
-    let readExpr = readLine ConsoleColor.Gray >> input
-    let mutable cont = true
-    while cont do
-        match readExpr() with
+    let readin start =
+        if start then
+            printfn "Type 'help' for help"
+
+        Console.ForegroundColor <- ConsoleColor.Gray
+        Console.Write "> "
+        Console.ReadLine(), false
+    let writeout() =
+        function
         | Output.Result value ->
             print ConsoleColor.Yellow value
         | Output.Messages msgs ->
@@ -60,5 +70,11 @@ let main _ =
             Console.Clear()
         | Output.Error msg ->
             print ConsoleColor.Red msg
-        | Output.Quit -> cont <- false
+    start
+        readin
+        writeout
+        State.Default
+        true
+        ()
+    |> ignore
     0

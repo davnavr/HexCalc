@@ -3,7 +3,7 @@ module HexCalc.Eval
 
 open FParsec
 
-let private exprRef = OperatorPrecedenceParser<Integer, unit, unit>()
+let private exprRef = OperatorPrecedenceParser<Integer, unit, unit>() // TODO: Parser state should be a State instead of unit.
 
 let private digits ibase (ds: char[]): Parser<_, unit> =
     let baseval = bigint ds.Length
@@ -63,14 +63,14 @@ let input =
     let help =
         spaces1 >>. restOfLine false |> opt
     [
-        expr |>> Input.Eval
+        expr |>> (Command.Eval >> Input)
 
-        command [ "clear"; "cls" ] Input.Clear
+        command [ "clear"; "cls" ] (Input Command.Clear)
         command [ "quit"; "exit" ] Input.Quit
 
         skipString "help"
         >>. help
-        |>> Input.Help
+        |>> (Command.Help >> Input)
     ]
     |> choice
     .>> eof
