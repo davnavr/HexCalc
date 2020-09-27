@@ -9,9 +9,10 @@ let private help =
         "Type an expression such as '1 + 2' to get started!"
         "Commands:"
         "'help' - Display this help message"
-        "'help <term>' - Displays information about an operator, function, or feature"
+        "'help <term>' - Displays information about an operator, function, or keyword"
         "'help all' - Displays all terms with a help message"
         "'clear' or 'cls' - Clears the screen"
+        "'listvars' - Lists all variables assigned with a non-zero value"
         "'quit' or 'exit' - Quits the application"
     ]
 
@@ -43,6 +44,12 @@ let rec start inf outf ins outs (state: State) =
                     | Result.Error _ ->
                         sprintf "Unknown term '%s'" term |> Output.Error
                 | Command.Clear -> Output.Clear
+                | Command.ListVariables ->
+                    state'.Variables
+                    |> Map.toList
+                    |> List.map (fun (name, value) ->
+                        sprintf "%s = %O" name value)
+                    |> Output.Messages
                 |> Some
             | Input.Quit -> None
         | Failure(msg, _, _) ->

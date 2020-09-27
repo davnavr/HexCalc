@@ -49,6 +49,7 @@ type Command =
     | Eval of result: Integer
     | Help of term: string option
     | Clear
+    | ListVariables
 
 [<StructuralComparison; StructuralEquality>]
 type Input =
@@ -62,9 +63,3 @@ type Output =
     | Error of msg: string
     | Messages of lines: string list
     | Clear
-
-type State =
-    { Answer: Integer }
-
-    static member Default =
-        { Answer = Integer.Zero }

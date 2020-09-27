@@ -28,7 +28,7 @@ let tests =
         "(-7 * -7) + 0b0001_0010", Base2, 67I
         "0x0 + 7 * (5 + (3 * 4))", Base10, 119I
         "-10 + 7", Base10, -3I
-        "0b1100 & 0b0101", Base2, 4I
+        " 0b1100 & 0b0101", Base2, 4I
         "0b0110 | 0x1", Base2, 7I
         "0x3 ^ 0b1100", Base2, 15I
         "10 % 7", Base10, 3I
@@ -41,6 +41,7 @@ let tests =
         "abs(-9)", Base10, 9I
         "abs ( -0b101 + 15)", Base2, 10I
         "ans + 0b0001_1010", Base2, 26I
+        "MyVariable - 9", Base10, -9I
     ]
     |> List.map (fun (str, expbase, expval) ->
         fun actual ->

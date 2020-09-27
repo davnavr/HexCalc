@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2020-09-26
 ### Added
-- 'ans' keyword that refers to the value of the previous evaluated expression
+- `ans` keyword that refers to the value of the previous evaluated expression
+- `listvars` command that lists all variables assigned with a non-zero value
+- Assignment of variables (variable names must start with an uppercase letter)
+- Usage of variables in expressions
 
 ## [0.3.0] - 2020-09-22
 ### Added

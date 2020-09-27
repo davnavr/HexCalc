@@ -85,7 +85,26 @@ let all: Map<string, string list> =
                     f.Example
             yield f.Name, info
 
-        yield "ans", [ "Contains the value of the expression that was last evaluated"; "Example:"; "> 7 - 5"; "2"; "> 1 + ans"; "3" ]
+        yield "ans",
+            [
+                "Contains the value of the expression that was last evaluated."
+                "Example:"
+                "> 7 - 5"
+                "2"
+                "> 1 + ans"
+                "3"
+            ]
+        yield "=",
+            [
+                "The variable assignment operator, binds the value of the expression on the right side of the operator to the name on the left side."
+                "The name of a variable must start with an upper case letter."
+                "If unassigned, the value of a variable defaults to zero."
+                "Example:"
+                "> Hello = 10"
+                "10"
+                "> Hello / 2"
+                "5"
+            ]
     ]
     |> Map.ofList
     |> List.foldBack

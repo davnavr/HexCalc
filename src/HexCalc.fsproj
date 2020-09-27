@@ -20,6 +20,7 @@
   <!-- Source files -->
   <ItemGroup>
     <Compile Include="Types.fs" />
+    <Compile Include="State.fs" />
     <Compile Include="Terms.fs" />
     <Compile Include="Eval.fs" />
     <Compile Include="Program.fs" />

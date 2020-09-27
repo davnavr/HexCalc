@@ -4,10 +4,21 @@ open Fuchu
 
 let tests =
     [
-        let outint value = Output.Result { Base = Base10; Value = value }
+        let inline outint ibase value = Output.Result { Base = ibase; Value = value }
+        let outdec = outint Base10
+        let outhex = outint Base16
+        let outmsgs = Output.Messages
 
-        [ "1 + 2"; "ans * 3"; "quit" ], [ outint 3I; outint 9I ]
-        [ "17"; "clear"; "1 + ans"; "quit" ], [ outint 17I; Output.Clear; outint 18I; ]
+        [ "quit" ], List.empty
+        [ "1 + 2"; "ans * 3"; "quit" ], [ outdec 3I; outdec 9I ]
+        [ "17"; "clear"; "1 + ans"; "quit" ], [ outdec 17I; Output.Clear; outdec 18I ]
+        [ "Hello"; "Hello = 5 * 2"; "Hello + 1"; "quit" ], [ outdec 0I; outdec 10I; outdec 11I ]
+        [ "90+\t5"; "Thing = hex(ans) - 0x4"; "ans"; "quit" ], [ outdec 95I; outhex 91I; outhex 91I; ]
+        [ "MyHexValue = 0x11"; "quit" ], [ outhex 17I ]
+        [ "listvars"; "Nope = 0"; "Test=  dec(4)"; "listvars"; "quit" ], [ outmsgs []; outdec 0I; outdec 4I; outmsgs [ "Test = 4" ] ]
+
+        let vars3 = [ "One = 1"; "Two = 0b10"; "Three = 0x3" ]
+        vars3 @ [ "listvars"; "quit" ], [ outdec 1I; outint Base2 2I; outhex 3I; List.sort vars3 |> outmsgs ]
 
         let rep =
             [
@@ -15,7 +26,7 @@ let tests =
                     yield "ans + 1"
                 yield "quit"
             ]
-        rep, List.map outint [ 1I..10I ]
+        rep, List.map outdec [ 1I..10I ]
 
         // TODO: Supply a large number of inputs to see if the program loop is tail recursive and does not throw an SOE.
     ]
