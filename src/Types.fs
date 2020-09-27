@@ -49,6 +49,7 @@ type Command =
     | Eval of result: Integer
     | Help of term: string option
     | Clear
+    | ListVariables
 
 [<StructuralComparison; StructuralEquality>]
 type Input =

@@ -101,6 +101,7 @@ let input =
 
         command [ "clear"; "cls" ] (Input Command.Clear)
         command [ "quit"; "exit" ] Input.Quit
+        command [ "listvars" ] (Input Command.ListVariables)
 
         // TODO: Add command to list all variables.
 
