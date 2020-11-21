@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2020-11-20
+## Added
+- Update to .NET 5
+- Error message that is printed when a division by zero occurs
+
 ## [0.4.0] - 2020-09-26
 ### Added
 - `ans` keyword that refers to the value of the previous evaluated expression
