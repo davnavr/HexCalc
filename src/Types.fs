@@ -1,5 +1,7 @@
 ﻿namespace HexCalc
 
+open System
+
 [<StructuralComparison; StructuralEquality>]
 type Base =
     | Base2
@@ -16,24 +18,28 @@ type Integer =
           Value = bigint.Zero }
 
     override this.ToString() =
-        let bstr f pfx (value: bigint) =
-            let sign, value' =
-                match value.Sign with
-                | -1 -> "-", -value
-                | _ -> "", value
-            value'.ToByteArray()
-            |> Seq.map f
-            |> Seq.rev
-            |> String.concat ""
-            |> sprintf "%s%s%s" sign pfx
-        let str =
-            match this.Base with
-            | Base10 -> string
-            | Base16 ->
-                bstr (sprintf "%X") "0x"
-            | Base2 ->
-                bstr (fun b -> System.Convert.ToString(b, 2)) "0b"
-        str this.Value
+        let inline print c =
+            match this.Value.Sign with
+            | -1 -> sprintf "-0%c%s" c
+            | _ -> sprintf "0%c%s" c
+        let value = abs this.Value
+        match this.Base with
+        | Base10 -> string this.Value
+        | Base16 when this.Value = bigint.Zero -> "0x0"
+        | Base16 ->
+            value
+                .ToString("X")
+                .TrimStart '0'
+            |> print 'x'
+        | Base2 when this.Value = bigint.Zero -> "0b0"
+        | Base2 ->
+            let str =
+                value.ToByteArray()
+                |> Seq.map
+                    (fun b -> Convert.ToString(b, 2).PadLeft(8, '0'))
+                |> Seq.rev
+                |> String.Concat
+            str.TrimStart('0') |> print 'b'
 
     override this.Equals(other) =
         this.Value = (other :?> Integer).Value

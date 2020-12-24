@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2020-12-23
+### Fixed
+- Fix bug where digits would disappear for hexadecimal and binary numbers.
+
 ## [0.5.0] - 2020-11-20
-## Added
+### Added
 - Update to .NET 5
 - Error message that is printed when a division by zero occurs
 
