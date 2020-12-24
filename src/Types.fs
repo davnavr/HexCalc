@@ -16,24 +16,19 @@ type Integer =
           Value = bigint.Zero }
 
     override this.ToString() =
-        let bstr f pfx (value: bigint) =
-            let sign, value' =
-                match value.Sign with
-                | -1 -> "-", -value
-                | _ -> "", value
-            value'.ToByteArray()
-            |> Seq.map f
-            |> Seq.rev
-            |> String.concat ""
-            |> sprintf "%s%s%s" sign pfx
-        let str =
-            match this.Base with
-            | Base10 -> string
-            | Base16 ->
-                bstr (sprintf "%X") "0x"
-            | Base2 ->
-                bstr (fun b -> System.Convert.ToString(b, 2)) "0b"
-        str this.Value
+        match this.Base with
+        | Base10 -> string this.Value
+        | Base16 ->
+            let print =
+                match this.Value.Sign with
+                | -1 -> sprintf "-0x%s"
+                | _ -> sprintf "0x%s"
+            bigint.Abs(this.Value)
+                .ToString("X")
+                .TrimStart('0')
+            |> print
+        | Base2 ->
+            invalidOp "not implemented for binary"
 
     override this.Equals(other) =
         this.Value = (other :?> Integer).Value
