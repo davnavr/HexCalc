@@ -10,10 +10,13 @@ let tests =
         Base2, 5I, "0b101"
         Base2, -2I, "-0b10"
         Base2, bigint.Zero, "0b0"
+        Base2, bigint 0b11100111111, "0b11100111111"
         Base16, bigint.One, "0x1"
         Base16, bigint 0x45, "0x45"
         Base16, -10I, "-0xA"
         Base16, bigint.Zero, "0x0"
+        Base16, bigint 0x3C00, "0x3C00"
+        Base16, bigint 0x1010, "0x1010"
     ]
     |> List.map (fun(ibase, ival, exp) ->
         fun() ->
